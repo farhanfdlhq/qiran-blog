@@ -38,6 +38,17 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => dismiss(id), tone === "err" ? 7000 : 3500);
   }, [dismiss]);
 
+  // Peringatan koneksi internet putus dan tersambung lagi
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    const down = () => setOffline(true);
+    const up = () => { setOffline(false); toast("Tersambung lagi."); };
+    setOffline(!navigator.onLine);
+    window.addEventListener("offline", down);
+    window.addEventListener("online", up);
+    return () => { window.removeEventListener("offline", down); window.removeEventListener("online", up); };
+  }, [toast]);
+
   const confirm = useCallback((opts: ConfirmOptions) => new Promise<ConfirmResult>((resolve) => setPending({ ...opts, resolve })), []);
 
   useEffect(() => {
@@ -55,6 +66,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   return (
     <FeedbackContext.Provider value={{ toast, confirm }}>
       {children}
+      {offline ? <p className="offline" role="alert">Koneksi internet terputus. Perubahan belum bisa disimpan.</p> : null}
       <div className="toasts" aria-live="polite" aria-relevant="additions">
         {toasts.map((t) => (
           <div key={t.id} className={`toast toast-${t.tone}`} role={t.tone === "err" ? "alert" : "status"}>

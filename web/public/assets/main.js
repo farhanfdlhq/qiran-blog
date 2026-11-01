@@ -246,7 +246,7 @@
     }
 
     /* ---------- Nama besar di footer selebar layar ---------- */
-    var mark = document.querySelector('.js-fit');
+    var mark = null; // nama besar di footer sudah tidak dipakai
     function fitMark() {
         if (!mark) return;
         mark.style.fontSize = '';

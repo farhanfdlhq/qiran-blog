@@ -57,7 +57,13 @@ try {
   await page.keyboard.type("penting");
   await page.keyboard.press("Shift+Home");
   await page.click('button[title="Tandai dengan stabilo"]');
-  await page.fill("#tags", "Uji, Opini");
+  await page.click("#tags");
+  await page.keyboard.type("Uji");
+  await page.keyboard.press("Enter");
+  await page.keyboard.type("opi");
+  check("saran tag muncul dari tag yang sudah ada", await page.locator(".tag-option:has-text('Opini')").isVisible({ timeout: 3000 }).catch(() => false));
+  await page.keyboard.press("Enter");
+  check("tag jadi chip, ejaan mengikuti tag yang ada", (await page.locator(".tag-chip").allTextContents()).join("|") === "Uji|Opini");
   // unggah gambar sampul
   const imgPath = path.join(os.tmpdir(), "qiran-e2e.png");
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -98,7 +104,7 @@ try {
   await pub.goto(BASE + "/");
   check("muncul di beranda sebagai tulisan terbaru", (await pub.textContent("#latest-title")).includes("Uji coba dari editor baru"));
   await pub.goto(BASE + "/tag/uji/");
-  check("halaman topik baru", (await pub.textContent("h1")).includes("Uji"));
+  check("halaman tag baru", (await pub.textContent("h1")).includes("Uji"));
 
   // 4. Jadwal terbit: tulisan masa depan tidak tampil
   await page.goto(BASE + "/admin/");

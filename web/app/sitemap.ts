@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const latest = posts[0]?.updated_at;
   return [
     { url: siteUrl("/"), lastModified: latest, changeFrequency: "weekly", priority: 1 },
+    { url: siteUrl("/ikuti/"), priority: 0.3 },
     ...posts.map((p) => ({
       url: siteUrl(postPath(p.slug)),
       lastModified: p.updated_at,

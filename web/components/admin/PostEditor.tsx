@@ -7,6 +7,7 @@ import { slugify } from "@/lib/text";
 import { saveFromEditor, deletePostAction, type EditorPayload } from "@/app/actions/admin";
 import { FormDialog } from "./Dialog";
 import { ConfirmButton } from "./ConfirmButton";
+import { TagInput } from "./TagInput";
 import { useFeedback } from "@/components/Feedback";
 
 type Initial = {
@@ -17,7 +18,8 @@ type Initial = {
   slugLocked: boolean; // pernah terbit: alamat tidak ikut berubah saat judul diganti
   excerpt: string;
   html: string;
-  tags: string;
+  tags: string[];
+  tagSuggestions: { name: string; count: number }[];
   featureImage: string;
   featureImageAlt: string;
   featureImageCaption: string;
@@ -101,6 +103,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
   const [scheduled, setScheduled] = useState(initial.scheduled);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [words, setWords] = useState(0);
   const [dialog, setDialog] = useState<null | { kind: "link"; href: string } | { kind: "image"; url: string }>(null);
@@ -117,6 +120,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
     onCreate: ({ editor: e }) => setWords(e.getText().split(/\s+/).filter(Boolean).length),
     onUpdate: ({ editor: e }) => {
       setDirty(true);
+      setSaveFailed(false);
       setWords(e.getText().split(/\s+/).filter(Boolean).length);
     },
   });
@@ -127,6 +131,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
   const touch = <T,>(setter: (v: T) => void) => (v: T) => {
     setter(v);
     setDirty(true);
+    setSaveFailed(false);
   };
 
   const save = useCallback(
@@ -148,7 +153,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
         slug: slugTouched ? slug : "",
         excerpt,
         html: editor.isEmpty ? "" : editor.getHTML(),
-        tags: isPage ? [] : tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tags: isPage ? [] : tags,
         featureImage: cover,
         featureImageAlt: coverAlt,
         featureImageCaption: coverCaption,
@@ -160,8 +165,10 @@ export function PostEditor({ initial }: { initial: Initial }) {
         const res = await saveFromEditor(payload);
         if (!res.ok) {
           toast(res.message, "err");
+          setSaveFailed(true);
           return false;
         }
+        setSaveFailed(false);
         if (intent !== "save") toast(res.message);
         if (res.ok) {
           setDirty(false);
@@ -172,6 +179,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
         }
       } catch {
         toast("Gagal menyimpan. Periksa koneksi internet lalu coba lagi.", "err");
+        setSaveFailed(true);
         return false;
       } finally {
         setSaving(false);
@@ -183,10 +191,10 @@ export function PostEditor({ initial }: { initial: Initial }) {
 
   // Simpan otomatis untuk draf, 4 detik setelah berhenti mengetik
   useEffect(() => {
-    if (!dirty || status !== "draft" || saving) return;
+    if (!dirty || status !== "draft" || saving || saveFailed) return;
     const t = setTimeout(() => save("save"), 4000);
     return () => clearTimeout(t);
-  }, [dirty, status, saving, save, title, excerpt, tags]);
+  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags]);
 
   // Ctrl/Cmd+S untuk menyimpan, dan peringatan kalau keluar sebelum tersimpan
   useEffect(() => {
@@ -265,14 +273,15 @@ export function PostEditor({ initial }: { initial: Initial }) {
 
   const future = !!publishAt && publishAt > nowWibInput();
   const statusLabel = status === "draft" ? "Draf" : scheduled ? "Terjadwal" : "Terbit";
-  const saveState = saving ? "Menyimpan…" : uploading ? "Mengunggah gambar…" : dirty ? "Belum tersimpan" : "Tersimpan";
+  const saveState = saving ? "Menyimpan…" : uploading ? "Mengunggah gambar…" : saveFailed ? "Gagal menyimpan" : dirty ? "Belum tersimpan" : "Tersimpan";
 
   return (
     <div className="editor-shell">
       <div className="editor-bar">
         <a className="textlink" href="/admin/">&larr; Kembali</a>
         <span className={`status${status === "published" ? (scheduled ? " status-scheduled" : " status-published") : ""}`}>{statusLabel}</span>
-        <span className="save-state" role="status" aria-live="polite">{saveState}</span>
+        <span className={`save-state${saveFailed ? " is-error" : ""}`} role="status" aria-live="polite">{saveState}</span>
+        {saveFailed ? <button type="button" className="textbtn" onClick={() => save("save").then((ok) => ok && toast("Tersimpan."))}>Coba lagi</button> : null}
         <span className="spacer" />
         <a className="btn btn-quiet btn-small" href={`/${shownSlug}/`} target="_blank" rel="noopener"
           onClick={(e) => { if (dirty) { e.preventDefault(); const w = window.open("about:blank", "_blank"); save("save").then((ok) => { if (w) { if (ok) w.location.href = `/${shownSlug}/`; else w.close(); } }); } }}>Pratinjau</a>
@@ -297,7 +306,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
               {cover ? <img src={cover} alt={coverAlt || "Gambar sampul"} /> : null}
               <div className="cover-actions">
                 <button className="btn btn-quiet btn-small" type="button" onClick={() => coverInput.current?.click()} disabled={uploading}>
-                  {cover ? "Ganti gambar sampul" : "Tambah gambar sampul"}
+                  {uploading ? "Mengunggah…" : cover ? "Ganti gambar sampul" : "Tambah gambar sampul"}
                 </button>
                 {cover ? <button className="btn btn-quiet btn-small" type="button" onClick={() => touch(setCover)("")}>Hapus sampul</button> : null}
               </div>
@@ -316,6 +325,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
             ) : null}
             <input ref={imageInput} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" hidden
               onChange={(e) => { onPickImage(e.target.files?.[0], "body"); e.target.value = ""; }} />
+            {editor ? null : <p className="editor-loading" role="status">Menyiapkan editor…</p>}
             <EditorContent editor={editor} />
             <p className="hint editor-count">{words} kata · sekitar {Math.max(1, Math.ceil(words / 200))} menit baca</p>
           </div>
@@ -326,8 +336,8 @@ export function PostEditor({ initial }: { initial: Initial }) {
           {!isPage ? (
             <div className="field">
               <label htmlFor="tags">Tag</label>
-              <input id="tags" value={tags} maxLength={200} onChange={(e) => touch(setTags)(e.target.value)} placeholder="Opini, Sekolah" aria-describedby="tags-hint" autoComplete="off" />
-              <p className="hint" id="tags-hint">Pisahkan dengan koma, maksimal 8. Tag pertama tampil di daftar tulisan.</p>
+              <TagInput id="tags" value={tags} onChange={touch(setTags)} suggestions={initial.tagSuggestions} describedBy="tags-hint" />
+              <p className="hint" id="tags-hint">Ketik lalu tekan Enter, atau pilih dari saran. Maksimal 8. Tag pertama (gelap) adalah tag utama yang tampil di daftar tulisan; klik tag lain untuk menjadikannya utama.</p>
             </div>
           ) : null}
           <div className="field">

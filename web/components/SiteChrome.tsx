@@ -1,7 +1,7 @@
 import Script from "next/script";
 import { siteSettings } from "@/lib/settings";
 import { getSessionUserFromCookie } from "@/lib/auth";
-import { Wordmark } from "@/components/Logo";
+import { Wordmark, LogoMark } from "@/components/Logo";
 
 export async function Topbar() {
   const s = siteSettings();
@@ -44,7 +44,7 @@ export async function Footer() {
         <div className="footer-col">
           <p className="footer-head">Ikuti tulisan baru</p>
           <ul className="plain">
-            <li><a href="/rss.xml">Lewat RSS</a></li>
+            <li><a href="/ikuti/">Cara mengikuti</a></li>
           </ul>
         </div>
         <div className="footer-col">
@@ -54,8 +54,11 @@ export async function Footer() {
           </ul>
         </div>
       </div>
-      <div className="footer-mark">
-        <p className="bigmark js-fit" aria-hidden="true">{s.site_title}</p>
+      <div className="footer-base">
+        <a className="footer-brand" href="/" aria-label={`${s.site_title}, ke beranda`}>
+          <LogoMark size={56} className="logo-mark" tile={false} />
+          <span>{s.site_title}</span>
+        </a>
         <p className="legal">&copy; {year} {s.site_title}. Semua tulisan milik penulisnya.</p>
       </div>
     </footer>

@@ -165,3 +165,35 @@
 .secret-value code { font-size: 22px; letter-spacing: .04em; user-select: all; overflow-wrap: anywhere; }
 .secret .btn-quiet { background: color-mix(in srgb, var(--inv-ink) 14%, transparent); color: var(--inv-ink); }
 .tag-form { max-width: none; }
+
+/* ---------- Kolom tag (chip + saran) ---------- */
+.tag-input {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px; border-radius: 6px;
+    background: var(--bg); cursor: text; min-height: 48px;
+}
+.tag-input:focus-within { outline: 2px solid var(--ink); outline-offset: 1px; }
+.tag-chips { display: contents; list-style: none; }
+.tag-chip { display: inline-flex; align-items: center; border-radius: 999px; background: var(--surface); }
+.tag-chip.is-primary { background: var(--ink); color: var(--bg); }
+.tag-chip-label { padding: 5px 4px 5px 12px; border: 0; background: none; color: inherit; font: inherit; font-size: 15px; cursor: pointer; }
+.tag-chip-x {
+    display: grid; place-items: center; width: 28px; height: 28px; margin-right: 2px;
+    border: 0; border-radius: 50%; background: none; color: inherit; opacity: .7; cursor: pointer;
+}
+.tag-chip-x:hover { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); }
+.tag-combo { position: relative; flex: 1; min-width: 120px; }
+.editor-side .tag-combo input { width: 100%; padding: 6px 6px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 16px; }
+.editor-side .tag-combo input:focus { outline: none; }
+.tag-input.is-full .tag-combo input::placeholder { color: var(--muted); }
+.tag-options {
+    position: absolute; z-index: 20; top: calc(100% + 8px); left: -6px; right: -6px; margin: 0; padding: 6px; list-style: none;
+    border-radius: 10px; background: var(--bg); box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+}
+.tag-option { display: flex; justify-content: space-between; gap: 12px; padding: 9px 10px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+.tag-option.is-active { background: var(--surface); }
+.tag-option.is-new { color: var(--muted); }
+.tag-option.is-new.is-active { color: var(--ink); }
+.tag-option-count { color: var(--muted); font-size: var(--step-small); white-space: nowrap; }
+
+.save-state.is-error { color: var(--danger); }
+.editor-loading { min-height: 50vh; color: var(--muted); }
