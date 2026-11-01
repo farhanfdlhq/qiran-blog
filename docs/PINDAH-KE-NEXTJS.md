@@ -160,15 +160,14 @@ Isinya salinan database dan semua gambar. Backup lebih dari 14 hari dihapus otom
 cd /opt/qiran-blog/web && ./scripts/deploy.sh
 ```
 
-Lalu klik **Restart** pada project `qiran` di aaPanel.
+Satu perintah ini mengerjakan semuanya:
 
-Skrip ini membangun versi baru di folder terpisah, jadi situs tetap jalan selama build. Kalau build gagal, situs tidak diubah sama sekali. Kalau setelah restart ada masalah, kembali ke versi sebelumnya:
+1. Mengambil kode terbaru dari GitHub.
+2. Mem-build versi baru di folder terpisah, jadi situs tetap jalan selama build. Kalau build gagal, situs tidak diubah.
+3. Menukar ke build baru dan me-restart aplikasi secara otomatis, dengan user yang sama seperti sebelumnya.
+4. Mengecek situs. Kalau tidak hidup dalam 60 detik, otomatis kembali ke versi sebelumnya.
 
-```bash
-cd /opt/qiran-blog/web && rm -rf .next && mv .next-old .next
-```
-
-lalu Restart lagi.
+Kalau skrip tidak menemukan cara restart otomatis, skrip memberi tahu, dan kamu cukup klik **Restart** pada project `qiran` di aaPanel.
 
 ---
 
