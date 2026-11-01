@@ -9,6 +9,7 @@ import { readingMinutes, jsonLd as toJsonLd } from "@/lib/text";
 import { imgSrcSet, postPath, siteUrl } from "@/lib/site";
 import { Row } from "@/components/PostList";
 import { CommentForm } from "@/components/CommentForm";
+import { ShareButtons } from "@/components/ShareButtons";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -119,6 +120,12 @@ export default async function PostPage({ params }: Props) {
               ))}
             </p>
           </footer>
+        ) : null}
+
+        {isPost && !preview ? (
+          <div className="article-end">
+            <ShareButtons title={post.title} url={siteUrl(postPath(post.slug))} />
+          </div>
         ) : null}
 
         {isPost && (commentsOpen || comments.length) ? (

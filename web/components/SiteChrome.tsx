@@ -42,12 +42,6 @@ export async function Footer() {
           </ul>
         </div>
         <div className="footer-col">
-          <p className="footer-head">Ikuti tulisan baru</p>
-          <ul className="plain">
-            <li><a href="/ikuti/">Cara mengikuti</a></li>
-          </ul>
-        </div>
-        <div className="footer-col">
           <p className="footer-head">Penulis</p>
           <ul className="plain">
             <li><a href="/admin/">{user ? `Panel (${user.name})` : "Masuk ke panel"}</a></li>

@@ -25,7 +25,9 @@ if [ ! -d node_modules ] || [ "$LOCK_BEFORE" != "$(sha1sum package-lock.json | c
 fi
 
 echo "==> Build di folder sementara (situs tetap jalan)"
-rm -rf .next-new
+# File tipe dari build lama bisa menyebut halaman yang sudah dihapus dan menggagalkan pemeriksaan TypeScript.
+# Folder itu tidak dipakai saat aplikasi berjalan, jadi aman dihapus.
+rm -rf .next-new .next/types
 if ! NEXT_DIST_DIR=.next-new npm run build; then
   rm -rf .next-new
   echo "" >&2

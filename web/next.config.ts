@@ -43,6 +43,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/rss/", destination: "/rss.xml", permanent: true },
+      { source: "/ikuti/", destination: "/", permanent: false },
       { source: "/ghost/", destination: "/admin/", permanent: false },
     ];
   },
