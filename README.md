@@ -100,12 +100,18 @@ Ghost sekarang berjalan di `127.0.0.1:2368`. Port ini hanya bisa diakses dari VP
 Ghost dijalankan lewat Docker, jadi **jangan** dibuat sebagai *Node.js Project*. Pakai **Proxy Project**:
 
 1. **Website → Proxy Project → Add**. Domain: `qiran.my.id` dan `www.qiran.my.id`. Target / proxy URL: `http://127.0.0.1:2368`. Send domain / host: `$host`.
-2. Buka pengaturan site → **SSL → Let's Encrypt**, centang kedua domain, Apply. Aktifkan **Force HTTPS**.
-3. Buka **Config** (file konfigurasi Nginx site ini) dan pastikan blok `location /` berisi baris berikut. Kalau belum ada, tambahkan (contoh lengkap di `nginx/ghost-proxy.conf`):
+2. **SSL** (pilih salah satu):
+   - **Cloudflare Origin Certificate** (yang dipakai sekarang): Cloudflare → SSL/TLS → Origin Server → Create Certificate (RSA, 15 tahun). Tempel *Private Key* dan *Origin Certificate* di aaPanel → site → **SSL → Current certificate** → Save, lalu nyalakan **Force HTTPS**. Awan Cloudflare wajib oranye.
+   - **Let's Encrypt**: site → **SSL → Let's Encrypt**, centang kedua domain, Apply. Awan Cloudflare harus abu-abu saat membuat sertifikat.
+3. **Batas upload.** Site → **Config file → Customized Configuration Files**, blok **server**, tambahkan lalu Save:
    ```
-   proxy_set_header X-Forwarded-Proto $scheme;
+   client_max_body_size 50m;
    ```
-   Tanpa baris itu browser akan menampilkan *too many redirects*. Tambahkan juga `client_max_body_size 50m;` di dalam blok `server` supaya upload gambar besar tidak ditolak.
+4. **Header https (wajib).** Di aaPanel 8, config utama Proxy Project terkunci dan blok `location` tidak bisa diubah dari panel. Tambahkan lewat terminal:
+   ```bash
+   F=/www/server/panel/vhost/nginx/qiran.my.id.conf; cp $F $F.bak; grep -q "X-Forwarded-Proto" $F || sed -i 's#^\(\s*\)proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;#&\n\1proxy_set_header X-Forwarded-Proto $scheme;#' $F; nginx -t && nginx -s reload && grep -n "Forwarded" $F
+   ```
+   Tanpa header ini login admin Ghost bisa gagal (terlempar balik ke halaman login). Jalankan ulang perintah ini setiap kali pengaturan **URL Proxy** diubah dari aaPanel, karena aaPanel bisa menulis ulang file tersebut. Perintahnya aman diulang.
 
 Buka <https://qiran.my.id>. Kalau halaman Ghost muncul, server sudah siap.
 
@@ -115,7 +121,7 @@ Buka <https://qiran.my.id>. Kalau halaman Ghost muncul, server sudah siap.
 2. Cloudflare → **SSL/TLS → Overview**: pilih **Full (strict)**. Jangan pakai *Flexible*, karena Ghost akan terus mengalihkan ke https dan halaman tidak pernah terbuka.
 3. Cloudflare → **Speed → Optimization**: pastikan **Rocket Loader** mati. Rocket Loader bisa merusak panel admin Ghost.
 
-Perpanjangan otomatis sertifikat Let's Encrypt di aaPanel tetap jalan saat proxy Cloudflare aktif.
+Dengan Origin Certificate tidak ada yang perlu diperpanjang sampai 15 tahun lagi.
 
 ### 6. Pengaturan pertama di Ghost
 
