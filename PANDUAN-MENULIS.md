@@ -57,6 +57,16 @@ Kalau pindah halaman sebelum tersimpan, akan muncul pertanyaan: simpan dulu, pin
 - **Perbarui:** untuk tulisan yang sudah terbit. Perubahan langsung tampil.
 - **Tarik jadi draf:** menyembunyikan lagi tulisan yang sudah terbit.
 
+## Mengelola banyak tulisan sekaligus
+
+Di halaman **Tulisan**, centang kotak di kiri setiap tulisan, atau centang **Pilih semua** di atas daftar. Tahan Shift sambil mencentang untuk memilih beberapa baris berurutan. Bilah gelap akan muncul di bawah dengan pilihan:
+
+- **Terbitkan:** menerbitkan tulisan yang dipilih. Tulisan tanpa judul atau isi dilewati.
+- **Jadikan draf:** menyembunyikan tulisan dari pembaca.
+- **Hapus:** menghapus tulisan beserta komentar dan statistiknya. Selalu ada konfirmasi dulu.
+
+Untuk menghapus satu tulisan, klik **Hapus** di ujung kanan barisnya.
+
 ## Komentar
 
 Komentar pembaca **tidak langsung tampil**. Komentar baru masuk ke menu **Komentar** (ada angka di sampingnya). Di sana kalian bisa:

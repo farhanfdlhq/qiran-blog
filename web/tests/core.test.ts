@@ -325,3 +325,32 @@ describe("tulisan: keterangan foto dan alamat khusus", () => {
     expect(q.content_html).toBe("<p>isi lama</p>");
   });
 });
+
+describe("aksi massal tulisan", () => {
+  beforeEach(async () => {
+    freshDataDir();
+    (await import("@/lib/db")).resetDbForTests();
+  });
+
+  it("penulis hanya bisa mengubah tulisannya sendiri; terbit dilewati untuk tulisan kosong", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
+    const b = await users.createUser({ email: "b@contoh.id", name: "Qirani", role: "author", password: PW });
+    const p1 = posts.savePost({ title: "Satu", authorId: a.id, status: "draft", html: "<p>isi</p>", tags: [] });
+    const p2 = posts.savePost({ title: "Tanpa judul", authorId: a.id, status: "draft", html: "", tags: [] });
+    const p3 = posts.savePost({ title: "Milik Qirani", authorId: b.id, status: "draft", html: "<p>isi</p>", tags: [] });
+
+    expect(posts.bulkUpdate(a, [p1.id, p2.id, p3.id], "publish")).toEqual({ done: 1, skipped: 2 });
+    expect(posts.getPostById(p1.id)!.status).toBe("published");
+    expect(posts.getPostById(p1.id)!.published_at).toBeTruthy();
+    expect(posts.getPostById(p3.id)!.status).toBe("draft");
+
+    expect(posts.bulkUpdate(a, [p1.id], "draft")).toEqual({ done: 1, skipped: 0 });
+    expect(posts.getPostById(p1.id)!.status).toBe("draft");
+
+    expect(posts.bulkUpdate(a, [p1.id, p3.id], "delete")).toEqual({ done: 1, skipped: 1 });
+    expect(posts.getPostById(p1.id)).toBeNull();
+    expect(posts.getPostById(p3.id)).not.toBeNull();
+  });
+});

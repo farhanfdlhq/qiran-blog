@@ -564,6 +564,8 @@ input[type="checkbox"]::after {
 }
 input[type="checkbox"]:checked { background: var(--ink); border-color: var(--ink); }
 input[type="checkbox"]:checked::after { transform: rotate(-45deg) scale(1); }
+input[type="checkbox"]:indeterminate { background: var(--ink); border-color: var(--ink); }
+input[type="checkbox"]:indeterminate::after { width: 10px; height: 0; margin-top: 0; border-left: 0; border-bottom: 2px solid var(--bg); transform: none; }
 input[type="checkbox"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 input[type="datetime-local"] { color-scheme: light; }
 :root[data-mode="dark"] input[type="datetime-local"] { color-scheme: dark; }

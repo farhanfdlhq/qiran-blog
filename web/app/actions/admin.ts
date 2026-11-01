@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { authenticate, createUser, deleteUser, getUser, setPassword, setRole, updateProfile, countAdmins, type Role } from "@/lib/users";
 import { tooManyAttempts, recordFailure, clearFailures } from "@/lib/sessions";
 import { startSession, endSession, requireUser, requireAdmin, clientIp } from "@/lib/auth";
-import { savePost, getPostById, canEdit, deletePost as removePost, updateTag, deleteTag, getAnyBySlug } from "@/lib/posts";
+import { savePost, getPostById, canEdit, deletePost as removePost, updateTag, deleteTag, getAnyBySlug, bulkUpdate, type BulkAction } from "@/lib/posts";
 import { setStatus, deleteComment, getComment, type CommentStatus } from "@/lib/comments";
 import { setSetting, DEFAULTS, type SettingKey } from "@/lib/settings";
 import { wibInputToIso } from "@/lib/time";
@@ -121,6 +121,17 @@ export async function deletePostAction(form: FormData) {
   if (post && canEdit(user, post) && post.type === "post") removePost(post.id);
   revalidatePath("/", "layout");
   redirect("/admin/");
+}
+
+export async function bulkPosts(ids: number[], action: BulkAction): Promise<FormState> {
+  const user = await requireUser();
+  if (!Array.isArray(ids) || !["publish", "draft", "delete"].includes(action)) return { message: "Permintaan tidak valid." };
+  const { done, skipped } = bulkUpdate(user, ids.map(Number), action);
+  revalidatePath("/", "layout");
+  const verb = action === "publish" ? "diterbitkan" : action === "draft" ? "dijadikan draf" : "dihapus";
+  if (!done) return { message: action === "publish" ? "Tidak ada yang bisa diterbitkan. Tulisan tanpa judul atau isi dilewati." : "Tidak ada tulisan yang diubah." };
+  const extra = skipped ? ` ${skipped} dilewati${action === "publish" ? " (tanpa judul atau isi)" : ""}.` : "";
+  return { ok: true, message: `${done} tulisan ${verb}.${extra}` };
 }
 
 export async function openAboutPage() {

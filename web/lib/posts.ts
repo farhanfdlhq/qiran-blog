@@ -283,3 +283,32 @@ export function cleanupEmptyDrafts(userId: number) {
   getDb().prepare(`DELETE FROM posts WHERE author_id = ? AND type = 'post' AND status = 'draft' AND title = 'Tanpa judul'
     AND plain_text = '' AND feature_image = '' AND updated_at < ?`).run(userId, before);
 }
+
+export type BulkAction = "publish" | "draft" | "delete";
+
+/**
+ * Ubah banyak tulisan sekaligus. Hanya tulisan yang boleh diedit pengguna ini yang diproses.
+ * Menerbitkan dilewati untuk tulisan tanpa judul atau tanpa isi.
+ */
+export function bulkUpdate(user: Pick<User, "id" | "role">, ids: number[], action: BulkAction): { done: number; skipped: number } {
+  const db = getDb();
+  let done = 0, skipped = 0;
+  const unique = [...new Set(ids.filter((n) => Number.isInteger(n) && n > 0))].slice(0, 500);
+  db.transaction(() => {
+    for (const id of unique) {
+      const p = getPostById(id);
+      if (!p || p.type !== "post" || !canEdit(user, p)) { skipped++; continue; }
+      if (action === "delete") {
+        db.prepare("DELETE FROM posts WHERE id = ?").run(id);
+      } else if (action === "draft") {
+        db.prepare("UPDATE posts SET status = 'draft', updated_at = ? WHERE id = ?").run(nowIso(), id);
+      } else {
+        const empty = !p.plain_text.trim() && !/<img/i.test(p.content_html);
+        if (empty || p.title.trim() === "" || p.title === "Tanpa judul") { skipped++; continue; }
+        db.prepare("UPDATE posts SET status = 'published', published_at = COALESCE(published_at, ?), updated_at = ? WHERE id = ?").run(nowIso(), nowIso(), id);
+      }
+      done++;
+    }
+  })();
+  return { done, skipped };
+}

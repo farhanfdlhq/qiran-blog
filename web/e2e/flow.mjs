@@ -178,6 +178,26 @@ try {
   await adm.goto(BASE + "/admin/statistik/");
   check("statistik admin mencatat pembaca", Number(await adm.textContent(".stat-num")) >= 1);
 
+  // 10b. Pilih banyak dan aksi massal di daftar tulisan
+  await adm.goto(BASE + "/admin/");
+  await adm.click(".list-tools input[type=checkbox]");
+  const total = await adm.locator(".row-check").count();
+  check("pilih semua mencentang semua baris", (await adm.locator(".row-check:checked").count()) === total && (await adm.locator(".bulk-bar").isVisible()));
+  await adm.click(".bulk-cancel");
+  check("batal pilih menutup bilah aksi", !(await adm.locator(".bulk-bar").isVisible()));
+  const row = adm.locator(".list-item", { hasText: "Tulisan untuk minggu depan" }).first();
+  await row.locator(".row-check").click();
+  await adm.click(".bulk-bar button:has-text('Jadikan draf')");
+  await adm.waitForSelector(".toast:has-text('1 tulisan dijadikan draf')", { timeout: 10000 });
+  await adm.waitForTimeout(800);
+  check("aksi massal: jadikan draf", (await row.locator(".status").textContent()) === "Draf");
+  await row.locator(".row-check").click();
+  await adm.click(".bulk-bar button:has-text('Hapus')");
+  await adm.locator(".dialog.confirm[open] button:has-text('Hapus tulisan')").click();
+  await adm.waitForSelector(".toast:has-text('1 tulisan dihapus')", { timeout: 10000 });
+  await adm.waitForTimeout(800);
+  check("aksi massal: hapus dengan konfirmasi", (await adm.locator(".list-item", { hasText: "Tulisan untuk minggu depan" }).count()) === 0);
+
   // 11. Upload ditolak tanpa login dan dari situs lain
   const up1 = await ap.request.post(BASE + "/api/upload/", { multipart: { file: { name: "a.png", mimeType: "image/png", buffer: png } } });
   check("upload ditolak tanpa login", up1.status() === 401);

@@ -197,3 +197,28 @@
 
 .save-state.is-error { color: var(--danger); }
 .editor-loading { min-height: 50vh; color: var(--muted); }
+
+/* ---------- Pilih banyak dan aksi massal ---------- */
+.list-tools { display: flex; align-items: center; gap: 16px; min-height: 40px; margin: 0 0 6px; max-width: 980px; font-size: var(--step-small); color: var(--muted); }
+.list-item-select { grid-template-columns: auto 1fr auto; column-gap: 16px; }
+.list-item-select .row-check { grid-row: 1 / span 2; align-self: center; }
+.list-item-select .list-meta { grid-column: 2; }
+.list-item-select .list-side { grid-column: 3; }
+.list-item.is-selected { background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: -12px 0 0 color-mix(in srgb, var(--accent) 22%, transparent), 12px 0 0 color-mix(in srgb, var(--accent) 22%, transparent); }
+.row-delete { color: var(--muted); }
+.row-delete:hover, .row-delete:focus-visible { color: var(--danger); }
+.bulk-bar {
+    position: sticky; bottom: 16px; z-index: 30; max-width: 980px; margin-top: 20px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+    padding: 12px 14px 12px 20px; border-radius: 14px; background: var(--inv-bg); color: var(--inv-ink);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 22%); animation: toast-in .25s var(--ease-out);
+}
+.bulk-count { font-size: 16px; }
+.bulk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bulk-quiet { background: color-mix(in srgb, var(--inv-ink) 14%, transparent); color: var(--inv-ink); }
+.bulk-cancel { color: var(--inv-muted); margin-left: 6px; font-size: 15px; }
+@media (max-width: 600px) {
+    .list-item-select { grid-template-columns: auto 1fr; }
+    .list-item-select .list-side { grid-column: 2; grid-row: auto; flex-wrap: wrap; }
+    .bulk-bar { bottom: 12px; }
+}
