@@ -1,0 +1,18 @@
+{{!< default}}
+
+<section class="archive archive-top has-peek" aria-labelledby="archive-title">
+    <div class="archive-col">
+        {{#author}}
+        {{#if profile_image}}<img class="avatar" src="{{img_url profile_image size="xs"}}" alt="" width="72" height="72">{{/if}}
+        <h1 class="archive-title js-lines js-fit-title" id="archive-title">Tulisan {{name}}</h1>
+        <p class="lead-soft">{{#if bio}}{{bio}}{{else}}Semua tulisan {{name}} di {{@site.title}}.{{/if}} {{plural ../pagination.total empty="" singular="Ada % tulisan." plural="Ada % tulisan."}}</p>
+        {{/author}}
+        <ol class="rows js-rows">
+            {{#foreach posts}}{{> row}}{{/foreach}}
+        </ol>
+        {{> pagination}}
+    </div>
+    <aside class="peeks" aria-label="Pratinjau tulisan">
+        {{#foreach posts}}{{> peek}}{{/foreach}}
+    </aside>
+</section>

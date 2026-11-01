@@ -1,0 +1,15 @@
+{{!< default}}
+{{!-- Halaman 2 dan seterusnya dari daftar tulisan --}}
+
+<section class="archive archive-top has-peek" aria-labelledby="archive-title">
+    <div class="archive-col">
+        <h1 class="archive-title js-lines js-fit-title" id="archive-title">Semua tulisan</h1>
+        <ol class="rows js-rows">
+            {{#foreach posts}}{{> row}}{{/foreach}}
+        </ol>
+        {{> pagination}}
+    </div>
+    <aside class="peeks" aria-label="Pratinjau tulisan">
+        {{#foreach posts}}{{> peek}}{{/foreach}}
+    </aside>
+</section>

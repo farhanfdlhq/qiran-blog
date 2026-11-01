@@ -1,0 +1,69 @@
+{
+  "name": "qiran",
+  "description": "Tema blog pribadi untuk qiran.my.id",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Farhan Achmad Fadhillah",
+    "email": "farhanfdlhq@users.noreply.github.com"
+  },
+  "keywords": [
+    "ghost-theme"
+  ],
+  "engines": {
+    "ghost": ">=5.0.0"
+  },
+  "config": {
+    "posts_per_page": 30,
+    "card_assets": true,
+    "image_sizes": {
+      "xs": {
+        "width": 160
+      },
+      "s": {
+        "width": 400
+      },
+      "m": {
+        "width": 720
+      },
+      "l": {
+        "width": 1000
+      },
+      "xl": {
+        "width": 1400
+      },
+      "xxl": {
+        "width": 2000
+      }
+    },
+    "custom": {
+      "judul_sambutan": {
+        "type": "text",
+        "default": "Tulisan dari tengah nama.",
+        "group": "homepage",
+        "description": "Kalimat besar di beranda. Maksimal sekitar 30 huruf supaya muat dua baris."
+      },
+      "kalimat_pendukung": {
+        "type": "text",
+        "default": "qiran adalah bagian tengah dari Qirana dan Qirani. Di sini kami belajar menulis opini, esai, cerita, dan apa saja yang sedang dipikirkan.",
+        "group": "homepage"
+      },
+      "tampilkan_tulisan_terbaru": {
+        "type": "boolean",
+        "default": true,
+        "group": "homepage",
+        "description": "Tampilkan tulisan terbaru dalam blok warna besar di beranda."
+      },
+      "mode_warna": {
+        "type": "select",
+        "options": [
+          "Otomatis",
+          "Terang",
+          "Gelap"
+        ],
+        "default": "Otomatis",
+        "description": "Otomatis mengikuti pengaturan perangkat pembaca."
+      }
+    }
+  }
+}

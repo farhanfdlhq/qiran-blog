@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{statusCode}} · {{@site.title}}</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400,500&display=swap">
+    <link rel="stylesheet" href="{{asset "css/screen.css"}}">
+</head>
+<body>
+    <main class="error">
+        <h1 class="error-title">{{#match statusCode 404}}Halaman ini tidak ada.{{else}}Ada yang rusak.{{/match}}</h1>
+        <p class="hero-text">{{#match statusCode 404}}Mungkin alamatnya salah ketik, atau tulisannya sudah dipindahkan. Kode {{statusCode}}.{{else}}{{message}}{{/match}}</p>
+        <a class="btn" href="{{@site.url}}">Kembali ke beranda</a>
+    </main>
+</body>
+</html>

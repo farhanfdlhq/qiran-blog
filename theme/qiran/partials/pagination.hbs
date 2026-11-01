@@ -1,0 +1,7 @@
+{{#match pagination.pages ">" 1}}
+<nav class="pager" aria-label="Halaman">
+    {{#if pagination.prev}}<a class="textlink" href="{{page_url pagination.prev}}">Lebih baru</a>{{else}}<span></span>{{/if}}
+    <span class="pager-info">Halaman {{pagination.page}} dari {{pagination.pages}}</span>
+    {{#if pagination.next}}<a class="textlink" href="{{page_url pagination.next}}">Lebih lama</a>{{else}}<span></span>{{/if}}
+</nav>
+{{/match}}

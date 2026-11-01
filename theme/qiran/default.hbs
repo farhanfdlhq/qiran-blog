@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="{{@site.locale}}" data-mode="{{#match @custom.mode_warna "Terang"}}light{{else match @custom.mode_warna "Gelap"}}dark{{else}}auto{{/match}}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{meta_title}}</title>
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400,401,500,700&display=swap">
+    <link rel="stylesheet" href="{{asset "css/screen.css"}}">
+    <script>
+        (function () {
+            var d = document.documentElement;
+            d.classList.add('js');
+            setTimeout(function () { d.classList.add('js-fallback'); }, 3000);
+            try {
+                var saved = localStorage.getItem('qiran-mode');
+                if (saved === 'light' || saved === 'dark') d.setAttribute('data-mode', saved);
+            } catch (e) {}
+        })();
+    </script>
+    {{ghost_head}}
+</head>
+<body class="{{body_class}}">
+<a class="skip-link" href="#isi">Langsung ke isi</a>
+
+<div class="page">
+    <header class="topbar">
+        <a class="wordmark" href="{{@site.url}}">{{#if @site.logo}}<img src="{{img_url @site.logo size="s"}}" alt="{{@site.title}}" height="32">{{else}}{{@site.title}}{{/if}}</a>
+
+        <nav class="topnav" id="menu" aria-label="Menu utama">
+            {{navigation}}
+        </nav>
+
+        <div class="topactions">
+            <button class="textbtn" type="button" data-ghost-search>Cari</button>
+            <button class="textbtn js-mode" type="button" aria-label="Ganti ke mode gelap"><span class="mode-label">Gelap</span></button>
+            {{#if @site.members_enabled}}
+                {{#unless @member}}
+                    <a class="textbtn" href="#/portal/signup" data-portal="signup">Ikuti</a>
+                {{else}}
+                    <a class="textbtn" href="#/portal/account" data-portal="account">Akun</a>
+                {{/unless}}
+            {{/if}}
+            <button class="textbtn menu-btn js-menu" type="button" aria-controls="menu" aria-expanded="false">Menu</button>
+        </div>
+    </header>
+
+    <main id="isi" class="main">
+        {{{body}}}
+    </main>
+</div>
+
+<footer class="footer">
+    <div class="footer-cols">
+        <div class="footer-col">
+            <p class="footer-head">{{@site.title}}</p>
+            {{#if @site.description}}<p>{{@site.description}}</p>{{/if}}
+        </div>
+        {{#if @site.secondary_navigation}}
+        <div class="footer-col">
+            <p class="footer-head">Halaman</p>
+            {{navigation type="secondary"}}
+        </div>
+        {{/if}}
+        <div class="footer-col">
+            <p class="footer-head">Ikuti tulisan baru</p>
+            <ul class="plain">
+                {{#if @site.members_enabled}}<li><a href="#/portal/signup" data-portal="signup">Lewat email</a></li>{{/if}}
+                <li><a href="{{@site.url}}/rss/">Lewat RSS</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <p class="footer-head">Dibuat dengan</p>
+            <p><a href="https://ghost.org" target="_blank" rel="noopener">Ghost</a> dan banyak kopi.</p>
+        </div>
+    </div>
+    <div class="footer-mark">
+        <p class="bigmark js-fit" aria-hidden="true">{{@site.title}}</p>
+        <p class="legal">&copy; {{date format="YYYY"}} {{@site.title}}. Semua tulisan milik penulisnya.</p>
+    </div>
+</footer>
+
+<script src="{{asset "js/main.js"}}" defer></script>
+{{ghost_foot}}
+</body>
+</html>

@@ -1,0 +1,69 @@
+{{!< default}}
+{{!-- Beranda (halaman 1). Halaman berikutnya memakai index.hbs. --}}
+
+<section class="hero" aria-labelledby="hero-title">
+    <h1 class="hero-title js-lines" id="hero-title">{{#if @custom.judul_sambutan}}{{@custom.judul_sambutan}}{{else}}{{@site.title}}{{/if}}</h1>
+    <div class="hero-foot">
+        <p class="hero-text">{{#if @custom.kalimat_pendukung}}{{@custom.kalimat_pendukung}}{{else}}{{@site.description}}{{/if}}</p>
+        {{#if posts}}<a class="btn hero-btn" href="#tulisan">Baca tulisan</a>{{/if}}
+    </div>
+</section>
+
+{{#if posts}}
+    {{#if @custom.tampilkan_tulisan_terbaru}}
+        {{#foreach posts limit="1"}}
+        <section class="latest" aria-labelledby="latest-title">
+            <div class="latest-inner">
+                <h2 class="latest-title reveal" id="latest-title"><a href="{{url}}">{{title}}</a></h2>
+                {{#if excerpt}}<p class="latest-text reveal">{{excerpt words="32"}}</p>{{/if}}
+                <div class="latest-foot reveal">
+                    <a class="btn btn-ink" href="{{url}}">Baca sampai habis</a>
+                    <p class="latest-meta">{{primary_author.name}}, {{date format="D MMMM YYYY"}}, {{reading_time minute="1 menit baca" minutes="% menit baca"}}</p>
+                </div>
+            </div>
+        </section>
+        {{#if feature_image}}
+        <figure class="relief">
+            <img class="relief-img"
+                srcset="{{img_url feature_image size="l"}} 1000w, {{img_url feature_image size="xl"}} 1400w, {{img_url feature_image size="xxl"}} 2000w"
+                sizes="100vw"
+                src="{{img_url feature_image size="xl"}}"
+                alt="{{#if feature_image_alt}}{{feature_image_alt}}{{else}}{{title}}{{/if}}"
+                width="2000" height="1125" loading="lazy">
+            {{#if feature_image_caption}}<figcaption>{{feature_image_caption}}</figcaption>{{/if}}
+        </figure>
+        {{/if}}
+        {{/foreach}}
+    {{/if}}
+
+    <section class="archive has-peek" id="tulisan" aria-labelledby="archive-title">
+        <div class="archive-col">
+            <h2 class="archive-title reveal" id="archive-title">Semua tulisan</h2>
+            {{> author-filter}}
+            <ol class="rows js-rows">
+                {{#foreach posts}}{{> row}}{{/foreach}}
+            </ol>
+            <p class="rows-empty js-empty" hidden>Belum ada tulisan dari penulis ini.</p>
+            {{> pagination}}
+        </div>
+        <aside class="peeks" aria-label="Pratinjau tulisan">
+            {{#foreach posts}}{{> peek}}{{/foreach}}
+        </aside>
+    </section>
+{{else}}
+    <section class="archive" id="tulisan" aria-labelledby="archive-title">
+        <div class="archive-col">
+            <h2 class="archive-title" id="archive-title">Belum ada tulisan</h2>
+            <p class="lead-soft">Tulisan pertama sedang disiapkan. Kalau kamu penulisnya, masuk ke <a class="textlink" href="{{@site.url}}/ghost/">panel penulis</a> untuk mulai.</p>
+        </div>
+    </section>
+{{/if}}
+
+{{#get "pages" filter="slug:tentang" limit="1" as |about|}}
+    {{#foreach about}}
+    <section class="about" aria-labelledby="about-title">
+        <h2 class="about-title reveal" id="about-title">Tentang {{@site.title}}</h2>
+        <div class="about-body reveal">{{content}}</div>
+    </section>
+    {{/foreach}}
+{{/get}}

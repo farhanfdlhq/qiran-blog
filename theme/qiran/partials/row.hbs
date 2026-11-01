@@ -1,0 +1,11 @@
+{{!-- Satu baris di daftar tulisan: judul di kiri, tanggal di kanan --}}
+<li class="row reveal" data-slug="{{slug}}" data-year="{{date format="YYYY"}}" data-author="{{primary_author.slug}}">
+    <a class="row-link" href="{{url}}">
+        <span class="row-dot" aria-hidden="true">{{#primary_author}}{{#if profile_image}}<img src="{{img_url profile_image size="xs"}}" alt="" width="16" height="16" loading="lazy">{{/if}}{{/primary_author}}</span>
+        <span class="row-main">
+            <span class="row-title">{{title}}</span>
+            <span class="row-sub">{{#primary_tag}}{{name}} · {{/primary_tag}}{{primary_author.name}}</span>
+        </span>
+        <time class="row-date" datetime="{{date format="YYYY-MM-DD"}}">{{date format="D MMM YYYY"}}</time>
+    </a>
+</li>

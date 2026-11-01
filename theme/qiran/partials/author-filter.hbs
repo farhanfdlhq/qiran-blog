@@ -1,0 +1,7 @@
+{{!-- Tombol saring penulis. Disembunyikan oleh main.js kalau penulisnya cuma satu. --}}
+{{#get "authors" limit="10" as |writers|}}
+<div class="filter js-filter" role="group" aria-label="Saring menurut penulis" hidden>
+    <button type="button" class="chip is-on" data-filter="semua" aria-pressed="true">Semua</button>
+    {{#foreach writers}}<button type="button" class="chip" data-filter="{{slug}}" aria-pressed="false">{{name}}</button>{{/foreach}}
+</div>
+{{/get}}

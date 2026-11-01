@@ -1,0 +1,59 @@
+# Ghost + MySQL untuk qiran.my.id
+# Nginx dari aaPanel menangani domain & SSL, lalu meneruskan ke Ghost di 127.0.0.1:2368.
+
+services:
+  ghost:
+    image: ghost:${GHOST_VERSION:-6-alpine}
+    container_name: qiran-ghost
+    restart: always
+    ports:
+      # Hanya bisa diakses dari VPS sendiri, tidak terbuka ke internet
+      - "127.0.0.1:${GHOST_PORT:-2368}:2368"
+    environment:
+      NODE_ENV: production
+      server__host: 0.0.0.0
+      url: https://${DOMAIN:?DOMAIN wajib diisi di .env}
+      database__client: mysql
+      database__connection__host: db
+      database__connection__user: ghost
+      database__connection__password: ${DATABASE_PASSWORD:?DATABASE_PASSWORD wajib diisi di .env}
+      database__connection__database: ghost
+      # Email untuk reset password, undangan, dan verifikasi login perangkat baru
+      mail__transport: SMTP
+      mail__from: ${MAIL_FROM:-}
+      mail__options__host: ${SMTP_HOST:-}
+      mail__options__port: ${SMTP_PORT:-587}
+      mail__options__secure: ${SMTP_SECURE:-false}
+      mail__options__auth__user: ${SMTP_USER:-}
+      mail__options__auth__pass: ${SMTP_PASSWORD:-}
+    volumes:
+      - ./data/ghost:/var/lib/ghost/content
+      # Tema kustom dari repo ini, langsung ter-update setiap git pull
+      - ./theme/qiran:/var/lib/ghost/content/themes/qiran
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - qiran
+
+  db:
+    image: mysql:8.0.46
+    container_name: qiran-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:?DATABASE_ROOT_PASSWORD wajib diisi di .env}
+      MYSQL_USER: ghost
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ghost
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -p$$MYSQL_ROOT_PASSWORD --silent
+      interval: 5s
+      start_period: 30s
+      retries: 30
+    networks:
+      - qiran
+
+networks:
+  qiran:
