@@ -22,6 +22,7 @@
     --inv-bg: #161c1a;
     --inv-ink: #e3e2da;
     --inv-muted: #a3a9a1;
+    --inv-accent: #9fc7b8;
 
     --font: "Sentient", Georgia, "Times New Roman", serif;
     --font-display: "Sentient", Georgia, serif;
@@ -48,6 +49,7 @@
     --inv-bg: #e3e2da;
     --inv-ink: #161c1a;
     --inv-muted: #4d5550;
+    --inv-accent: #3d7a66;
     --mark: #2f5d50;
     --danger: #f19a8b;
     --danger-bg: #4a1f18;
@@ -61,6 +63,7 @@
         --inv-bg: #e3e2da;
         --inv-ink: #161c1a;
         --inv-muted: #4d5550;
+    --inv-accent: #3d7a66;
         --mark: #2f5d50;
         --danger: #f19a8b;
         --danger-bg: #4a1f18;
@@ -423,7 +426,7 @@ p { text-wrap: pretty; }
     margin-top: clamp(56px, 8vw, 104px);
 }
 .footer-brand {
-    display: inline-flex; align-items: center; gap: .08em; color: var(--inv-ink); text-decoration: none;
+    display: inline-flex; align-items: center; gap: .08em; color: var(--inv-ink); text-decoration: none; --logo-accent: var(--inv-accent);
     font: 300 clamp(44px, 6vw, 84px)/1 var(--font-display); letter-spacing: -.045em;
 }
 .footer-brand .logo-mark { width: .9em; height: .9em; border-radius: 0; transform: translateY(.04em); }
