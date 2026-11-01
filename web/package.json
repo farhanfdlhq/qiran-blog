@@ -4,7 +4,7 @@
   "private": true,
   "description": "Blog qiran.my.id: Next.js + SQLite",
   "engines": {
-    "node": ">=20.9"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev": "next dev -p 3100",
@@ -15,7 +15,8 @@
     "user": "tsx scripts/user.ts",
     "import:ghost": "tsx scripts/import-ghost.ts",
     "backup": "bash scripts/backup.sh",
-    "test:e2e": "node e2e/flow.mjs"
+    "test:e2e": "node e2e/flow.mjs",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@tiptap/extension-highlight": "3.32.2",

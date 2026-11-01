@@ -1,6 +1,6 @@
 # web: aplikasi blog qiran.my.id
 
-Next.js 16 + SQLite. Satu aplikasi untuk situs publik dan panel penulis di `/admin/`.
+Next.js 16 + SQLite, Node 22 atau lebih baru. Satu aplikasi untuk situs publik dan panel penulis di `/admin/`.
 
 ## Fitur
 
@@ -55,6 +55,7 @@ Buka http://localhost:3100 dan http://localhost:3100/admin/.
 | `npm run test:e2e` | Uji alur di browser. Butuh server yang sedang jalan, Playwright, dan variabel `ADMIN_EMAIL`, `ADMIN_PW`, `AUTHOR_EMAIL`, `AUTHOR_PW` |
 | `npm run typecheck` | Pemeriksaan TypeScript |
 | `npm run user -- add/reset/list` | Kelola akun dari terminal |
+| `npm run seed` | Isi tulisan contoh, halaman Tentang, dan topik |
 | `npm run import:ghost -- ekspor.json [folder-konten-ghost]` | Impor dari Ghost |
 | `npm run backup` | Backup database dan gambar |
 

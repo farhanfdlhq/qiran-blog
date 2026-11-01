@@ -38,7 +38,13 @@ async function main() {
   }
 }
 
+if (Number(process.versions.node.split(".")[0]) < 22) {
+  console.error(`Node ${process.versions.node} terlalu lama. Pakai Node 22 atau lebih baru (misalnya v24 dari aaPanel).`);
+  process.exit(1);
+}
 main().catch((e) => {
-  console.error(e instanceof Error ? e.message : e);
+  const msg = e instanceof Error ? e.message : String(e);
+  if (/UNIQUE/.test(msg)) console.error("Gagal: email itu sudah terdaftar. Untuk membuat password baru: npm run user -- reset --email <email>");
+  else console.error("Gagal:", msg);
   process.exit(1);
 });

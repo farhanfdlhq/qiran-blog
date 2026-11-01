@@ -23,45 +23,41 @@ cd /opt/qiran-blog && git fetch origin nextjs-blog && git checkout nextjs-blog
 
 Ghost tidak terganggu, karena file Ghost tetap ada di branch ini. Aplikasi baru ada di folder `web/`.
 
-## 2. Pastikan versi Node
+## 2. Pakai Node v24
 
-Aplikasi butuh Node 20.9 atau lebih baru. Di aaPanel **Website → Node.js Project → Node version manager**, pastikan v24 terpasang (sudah dipakai project lain). Cek versi yang aktif di terminal:
+Aplikasi butuh **Node 22 atau lebih baru**. Node bawaan terminal VPS masih v20, jadi pakai v24 yang sudah dipasang aaPanel (versi yang sama dengan project Node lain). Jalankan ini setiap kali membuka terminal baru untuk mengurus blog:
 
 ```bash
-node -v
+export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && node -v
 ```
 
-Kalau masih v20, itu juga cukup. Kalau lebih rendah, pakai v24 dari aaPanel: `export PATH=/www/server/nodejs/v24.13.0/bin:$PATH` (sesuaikan nomor versinya dengan yang terpasang).
+Hasilnya harus `v24.13.0`. Kalau folder itu tidak ada, lihat nomor versi yang terpasang dengan `ls /www/server/nodejs/`.
 
 ## 3. Pasang dan build
 
-```bash
-cd /opt/qiran-blog/web && cp .env.example .env.production && nano .env.production
-```
-
-Isi `.env.production`:
-
-```
-SITE_URL=https://qiran.my.id
-DATA_DIR=/opt/qiran-blog/data/web
-PORT=3100
-```
-
-Lalu:
+`.env.production` cukup disalin dari contoh. Isinya sudah benar untuk qiran.my.id:
 
 ```bash
-cd /opt/qiran-blog/web && npm ci && npm run build
+cd /opt/qiran-blog/web && cp -n .env.example .env.production && cat .env.production
 ```
 
-Build butuh sekitar 1 sampai 3 menit.
+Pasang ulang paket dengan Node v24. Ini wajib kalau sebelumnya sempat memakai Node v20, karena modul SQLite harus cocok dengan versi Node:
+
+```bash
+cd /opt/qiran-blog/web && rm -rf node_modules .next && npm ci && npm run build
+```
+
+Tidak boleh ada peringatan `EBADENGINE`. Build butuh sekitar 1 sampai 3 menit.
 
 ## 4. Buat akun
 
-Akun admin untuk kakak, lalu satu akun penulis untuk tiap adik. Password acak akan tampil sekali, jadi catat dan sampaikan langsung.
+Akun admin dulu. Password acak akan tampil sekali, jadi catat.
 
 ```bash
-cd /opt/qiran-blog/web && npm run user -- add --email emailkamu@gmail.com --name "Farhan" --role admin
+cd /opt/qiran-blog/web && npm run user -- add --email admin@qiran.my.id --name "Farhan" --role admin
 ```
+
+Lalu satu akun penulis untuk tiap adik:
 
 ```bash
 cd /opt/qiran-blog/web && npm run user -- add --email emailqirana@gmail.com --name "Qirana"
@@ -71,19 +67,29 @@ cd /opt/qiran-blog/web && npm run user -- add --email emailqirana@gmail.com --na
 cd /opt/qiran-blog/web && npm run user -- add --email emailqirani@gmail.com --name "Qirani"
 ```
 
-Akun juga bisa ditambah nanti dari panel, di menu **Pengguna**.
-
-## 5. Pindahkan isi dari Ghost
-
-1. Di Ghost: **Settings → Import/Export → Export** → **Export content**. File `.json` akan terunduh.
-2. Unggah file itu ke VPS lewat aaPanel **Files**, ke `/opt/qiran-blog/ghost-export.json`.
-3. Impor. Folder konten Ghost ikut disebut supaya gambar ikut tersalin:
+Cek daftar akun:
 
 ```bash
-cd /opt/qiran-blog/web && npm run import:ghost -- /opt/qiran-blog/ghost-export.json /opt/qiran-blog/data/ghost --author emailkamu@gmail.com
+cd /opt/qiran-blog/web && npm run user -- list
 ```
 
-Semua tulisan akan tercatat atas nama akun yang disebut di `--author`. Kalau ada tulisan yang memang milik Qirana atau Qirani, admin bisa memindahkannya nanti. Impor aman dijalankan ulang, karena tulisan yang alamatnya sudah ada akan dilewati.
+Akun juga bisa ditambah nanti dari panel, di menu **Pengguna**.
+
+## 5. Isi tulisan contoh
+
+Satu perintah untuk mengisi 6 tulisan contoh, halaman Tentang, topik, dan fotonya. Isinya sama dengan yang sekarang tampil di Ghost:
+
+```bash
+cd /opt/qiran-blog/web && npm run seed
+```
+
+Semua tulisan tercatat atas nama admin pertama. Pakai `npm run seed -- --author email@...` untuk akun lain. Perintah ini aman dijalankan ulang, karena tulisan yang sudah ada akan dilewati.
+
+Kalau di Ghost sudah ada tulisan baru yang ingin ikut dipindahkan, pakai impor dari ekspor Ghost (Settings → Import/Export → Export content):
+
+```bash
+cd /opt/qiran-blog/web && npm run import:ghost -- /opt/qiran-blog/ghost-export.json /opt/qiran-blog/data/ghost
+```
 
 ## 6. Jalankan aplikasi
 
@@ -143,7 +149,7 @@ Data Ghost tidak dihapus (folder `data/ghost` dan `data/mysql` tetap ada), jadi 
 ## 9. Backup
 
 ```bash
-cd /opt/qiran-blog/web && BACKUP_DIR=/www/backup/qiran ./scripts/backup.sh
+export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog/web && BACKUP_DIR=/www/backup/qiran ./scripts/backup.sh
 ```
 
 Isinya salinan database dan semua gambar. Backup lebih dari 14 hari dihapus otomatis. Kalau mau jadwal harian, tambahkan perintah yang sama di aaPanel **Cron** (Shell Script).
@@ -151,7 +157,7 @@ Isinya salinan database dan semua gambar. Backup lebih dari 14 hari dihapus otom
 ## 10. Update aplikasi nanti
 
 ```bash
-cd /opt/qiran-blog && git pull && cd web && npm ci && npm run build
+export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog && git pull && cd web && npm ci && npm run build
 ```
 
 Lalu klik **Restart** pada project `qiran` di aaPanel Node.js Project.
