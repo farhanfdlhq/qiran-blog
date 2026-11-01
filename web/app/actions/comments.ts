@@ -1,5 +1,5 @@
 "use server";
-import { checkComment, addComment, recentCommentsFrom } from "@/lib/comments";
+import { checkComment, addComment, recentCommentsFrom, recentCommentsTotal } from "@/lib/comments";
 import { getPostById } from "@/lib/posts";
 import { siteSettings } from "@/lib/settings";
 import { ipHash } from "@/lib/stats";
@@ -26,6 +26,7 @@ export async function submitComment(_prev: CommentState, form: FormData): Promis
   if (problem === "spam") return { ok: true, message: "Terima kasih! Komentarmu akan tampil setelah disetujui penulis." };
   if (problem) return { message: problem };
   const hash = ipHash(await clientIp());
+  if (recentCommentsTotal() >= 60) return { message: "Komentar sedang ramai sekali. Coba lagi sekitar satu jam lagi." };
   if (recentCommentsFrom(hash) >= 5) return { message: "Terlalu banyak komentar dalam waktu singkat. Coba lagi beberapa menit lagi." };
   addComment({ postId, name: input.name, body: input.body, ipHash: hash });
   return { ok: true, message: "Terima kasih! Komentarmu akan tampil setelah disetujui penulis." };

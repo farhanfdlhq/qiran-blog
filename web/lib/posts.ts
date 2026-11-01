@@ -1,7 +1,7 @@
 /** Tulisan dan halaman: simpan, ambil, daftar, cari. */
 import { getDb } from "./db";
 import { slugify, plainText, makeExcerpt } from "./text";
-import { sanitize, sanitizeInline, renderDoc } from "./render";
+import { sanitize } from "./render";
 import { nowIso } from "./time";
 import type { User } from "./users";
 
@@ -51,8 +51,18 @@ function hydrate(rows: Post[]): PostFull[] {
   }));
 }
 
+function existingHtml(id?: number): string {
+  if (!id) return "";
+  const row = getDb().prepare("SELECT content_html FROM posts WHERE id = ?").get(id) as { content_html: string } | undefined;
+  return row?.content_html ?? "";
+}
+
+/** Alamat yang dipakai halaman lain di situs, tidak boleh dipakai tulisan */
+export const RESERVED_SLUGS = new Set(["admin", "api", "cari", "tag", "author", "page", "uploads", "rss", "sitemap", "robots", "assets", "favicon", "manifest", "logo"]);
+
 function uniqueSlug(base: string, ignoreId?: number): string {
   const db = getDb();
+  if (RESERVED_SLUGS.has(base)) base = `${base}-tulisan`;
   let slug = base, i = 2;
   while (db.prepare("SELECT 1 FROM posts WHERE slug = ? AND id IS NOT ?").get(slug, ignoreId ?? null)) slug = `${base}-${i++}`;
   return slug;
@@ -76,7 +86,6 @@ export type SaveInput = {
   title: string;
   slug?: string;
   excerpt?: string;
-  json?: unknown;
   html?: string;
   featureImage?: string;
   featureImageAlt?: string;
@@ -91,7 +100,7 @@ export type SaveInput = {
 export function savePost(input: SaveInput): Post {
   const db = getDb();
   const title = input.title.trim() || "Tanpa judul";
-  const html = input.json ? renderDoc(input.json) : sanitize(input.html ?? "");
+  const html = sanitize(input.html ?? existingHtml(input.id));
   const text = plainText(html);
   const existing = input.id ? getPostById(input.id) : null;
   // Alamat draf mengikuti judul sampai penulis mengisinya sendiri atau tulisan pernah terbit
@@ -106,12 +115,12 @@ export function savePost(input: SaveInput): Post {
     title,
     slug,
     excerpt: (input.excerpt ?? "").trim().slice(0, 300),
-    content_json: input.json ? JSON.stringify(input.json) : existing && !input.html ? existing.content_json : null,
+    content_json: null,
     content_html: html,
     plain_text: text,
     feature_image: input.featureImage ?? existing?.feature_image ?? "",
     feature_image_alt: (input.featureImageAlt ?? existing?.feature_image_alt ?? "").slice(0, 200),
-    feature_image_caption: sanitizeInline(input.featureImageCaption ?? existing?.feature_image_caption ?? "").slice(0, 500),
+    feature_image_caption: plainText(sanitize(input.featureImageCaption ?? existing?.feature_image_caption ?? "")).slice(0, 300),
     status: input.status,
     published_at: publishedAt,
     allow_comments: input.allowComments === false ? 0 : 1,
@@ -266,4 +275,11 @@ export function excerptOf(p: Pick<Post, "excerpt" | "plain_text">, max = 180): s
 
 export function isScheduled(p: Pick<Post, "status" | "published_at">): boolean {
   return p.status === "published" && !!p.published_at && p.published_at > nowIso();
+}
+
+/** Hapus draf kosong ("Tanpa judul", tanpa isi dan gambar) milik penulis yang ditinggal lebih dari 1 jam. */
+export function cleanupEmptyDrafts(userId: number) {
+  const before = new Date(Date.now() - 3600_000).toISOString();
+  getDb().prepare(`DELETE FROM posts WHERE author_id = ? AND type = 'post' AND status = 'draft' AND title = 'Tanpa judul'
+    AND plain_text = '' AND feature_image = '' AND updated_at < ?`).run(userId, before);
 }

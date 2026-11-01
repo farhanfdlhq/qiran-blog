@@ -1,12 +1,13 @@
 import Script from "next/script";
 import { siteSettings } from "@/lib/settings";
 import { getSessionUserFromCookie } from "@/lib/auth";
+import { Wordmark } from "@/components/Logo";
 
 export async function Topbar() {
   const s = siteSettings();
   return (
     <header className="topbar">
-      <a className="wordmark" href="/">{s.site_title}</a>
+      <a className="wordmark" href="/" aria-label={`${s.site_title}, ke beranda`}><Wordmark name={s.site_title} /></a>
       <nav className="topnav" id="menu" aria-label="Menu utama">
         <ul className="nav">
           <li><a href="/#tulisan">Tulisan</a></li>

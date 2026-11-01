@@ -2,11 +2,12 @@
 import { useActionState } from "react";
 import { login, type FormState } from "@/app/actions/admin";
 import { PasswordInput } from "./PasswordInput";
+import { validateForm } from "@/lib/validate";
 
 export function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(login, {});
   return (
-    <form className="form" action={action}>
+    <form className="form" action={action} noValidate onSubmit={(e) => { if (!validateForm(e.currentTarget)) e.preventDefault(); }}>
       <input type="hidden" name="next" value={next} />
       <div className="field">
         <label htmlFor="email">Email</label>

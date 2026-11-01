@@ -1,5 +1,5 @@
 /**
- * Impor tulisan, halaman, dan topik dari file ekspor Ghost.
+ * Impor tulisan, halaman, dan tag dari file ekspor Ghost.
  *   npm run import:ghost -- /path/ke/ekspor-ghost.json /opt/qiran-blog/data/ghost --author kakak@contoh.id
  * Argumen kedua (opsional) adalah folder konten Ghost, supaya gambar ikut disalin.
  * Tulisan yang alamatnya sudah ada akan dilewati, jadi aman dijalankan ulang.

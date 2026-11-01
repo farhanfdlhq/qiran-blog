@@ -42,7 +42,7 @@ describe("text", async () => {
 });
 
 describe("render", async () => {
-  const { sanitize, renderDoc } = await import("@/lib/render");
+  const { sanitize } = await import("@/lib/render");
 
   it("membuang script, event handler, dan tautan javascript", () => {
     const dirty = '<p onclick="x()">Hai<script>alert(1)</script> <a href="javascript:alert(1)">a</a> <a href="https://ok.id">b</a></p><img src="x" onerror="y()">';
@@ -60,17 +60,12 @@ describe("render", async () => {
     expect(clean).toContain('src="/uploads/2026/11/a.jpg"');
   });
 
-  it("merender dokumen Tiptap jadi HTML aman", () => {
-    const doc = {
-      type: "doc",
-      content: [
-        { type: "paragraph", content: [{ type: "text", text: "Halo " }, { type: "text", text: "dunia", marks: [{ type: "highlight" }] }] },
-        { type: "paragraph", content: [{ type: "text", text: "jahat", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] }] },
-      ],
-    };
-    const html = renderDoc(doc);
-    expect(html).toContain("<mark>dunia</mark>");
-    expect(html).not.toMatch(/javascript:/i);
+  it("HTML dari editor disaring: tautan javascript dan atribut berbahaya dibuang", () => {
+    const html = '<p>Halo <mark>dunia</mark></p><p><a href="javascript:alert(1)" target="_blank">jahat</a> <a href="https://ok.id">baik</a></p><p style="color:red" data-x="1">x</p>';
+    const clean = sanitize(html);
+    expect(clean).toContain("<mark>dunia</mark>");
+    expect(clean).not.toMatch(/javascript:|style=|data-x/i);
+    expect(clean).toContain('href="https://ok.id"');
   });
 });
 
@@ -297,9 +292,36 @@ describe("keamanan", async () => {
     expect(JSON.parse(out).headline).toBe("</script><script>alert(1)</script>");
   });
 
-  it("keterangan foto hanya boleh tautan dan format sederhana", async () => {
-    const { sanitizeInline } = await import("@/lib/render");
-    const out = sanitizeInline('Foto: <a href="https://unsplash.com/x" onclick="x()">Budi</a><img src=x onerror=y()><script>z()</script>');
-    expect(out).toBe('Foto: <a href="https://unsplash.com/x" rel="noopener noreferrer" target="_blank">Budi</a>');
+});
+
+describe("tulisan: keterangan foto dan alamat khusus", () => {
+  beforeEach(async () => {
+    freshDataDir();
+    (await import("@/lib/db")).resetDbForTests();
+  });
+
+  it("keterangan foto disimpan sebagai teks biasa", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
+    const p = posts.savePost({ title: "T", authorId: a.id, status: "draft", html: "<p>x</p>", tags: [], featureImageCaption: 'Foto: <a href="https://x.id">Budi</a><script>y()</script>' });
+    expect(p.feature_image_caption).toBe("Foto: Budi");
+  });
+
+  it("judul yang bentrok dengan halaman situs diberi alamat lain", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
+    expect(posts.savePost({ title: "Admin", authorId: a.id, status: "draft", html: "", tags: [] }).slug).toBe("admin-tulisan");
+    expect(posts.savePost({ title: "x", slug: "cari", authorId: a.id, status: "draft", html: "", tags: [] }).slug).toBe("cari-tulisan");
+  });
+
+  it("menyimpan tanpa html mempertahankan isi lama", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
+    const p = posts.savePost({ title: "T", authorId: a.id, status: "draft", html: "<p>isi lama</p>", tags: [] });
+    const q = posts.savePost({ id: p.id, title: "T2", authorId: a.id, status: "draft", tags: [] });
+    expect(q.content_html).toBe("<p>isi lama</p>");
   });
 });

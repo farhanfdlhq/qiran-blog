@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitComment, type CommentState } from "@/app/actions/comments";
+import { validateForm } from "@/lib/validate";
 
 export function CommentForm({ postId }: { postId: number }) {
   const [state, action, pending] = useActionState<CommentState, FormData>(submitComment, {});
@@ -13,7 +14,7 @@ export function CommentForm({ postId }: { postId: number }) {
   }, [state]);
 
   return (
-    <form ref={formRef} className="comment-form" action={action}>
+    <form ref={formRef} className="comment-form" action={action} noValidate onSubmit={(e) => { if (!validateForm(e.currentTarget)) e.preventDefault(); }}>
       <input type="hidden" name="post_id" value={postId} />
       <input type="hidden" name="started_at" value={startedAt} />
       <div className="hp" aria-hidden="true">
@@ -29,7 +30,7 @@ export function CommentForm({ postId }: { postId: number }) {
         <textarea id="c-body" name="body" required maxLength={2000} aria-describedby="c-note" />
       </div>
       <p className="form-note" id="c-note">Komentar tampil setelah disetujui penulis. Tidak perlu email atau akun.</p>
-      {state.message ? <p className="form-msg" role="status">{state.message}</p> : null}
+      {state.message ? <p className={`form-msg ${state.ok ? "form-msg-ok" : "form-msg-err"}`} role={state.ok ? "status" : "alert"}>{state.message}</p> : null}
       <div><button className="btn" type="submit" disabled={pending}>{pending ? "Mengirim…" : "Kirim komentar"}</button></div>
     </form>
   );

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { siteSettings } from "@/lib/settings";
 import { siteUrl } from "@/lib/site";
 import "./site.css";
@@ -12,10 +12,21 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: s.site_title, template: `%s · ${s.site_title}` },
     description: s.site_description,
     alternates: { types: { "application/rss+xml": [{ url: "/rss.xml", title: s.site_title }] } },
-    openGraph: { siteName: s.site_title, locale: "id_ID", type: "website" },
-    icons: { icon: "/favicon.svg" },
+    openGraph: { siteName: s.site_title, locale: "id_ID", type: "website", images: [{ url: "/og.png", width: 1200, height: 630, alt: s.site_title }] },
+    twitter: { card: "summary_large_image", images: ["/og.png"] },
+    icons: {
+      icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/icon.svg", type: "image/svg+xml" }],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e3e2da" },
+    { media: "(prefers-color-scheme: dark)", color: "#161c1a" },
+  ],
+};
 
 // Dijalankan sebelum halaman tampil, supaya mode gelap/terang tidak berkedip
 const MODE_SCRIPT = `(function(){var d=document.documentElement;d.classList.add('js');setTimeout(function(){d.classList.add('js-fallback')},3000);try{var m=localStorage.getItem('qiran-mode');if(m==='light'||m==='dark')d.setAttribute('data-mode',m)}catch(e){}})();`;

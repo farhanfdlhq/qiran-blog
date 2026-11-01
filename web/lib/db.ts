@@ -2,6 +2,7 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
+import { plainText } from "./text";
 
 type DB = Database.Database;
 const g = globalThis as unknown as { __qiranDb?: DB; __qiranDbPath?: string };
@@ -38,7 +39,9 @@ export function resetDbForTests() {
   g.__qiranDbPath = undefined;
 }
 
-const MIGRATIONS: string[] = [
+type Migration = string | ((db: DB) => void);
+
+const MIGRATIONS: Migration[] = [
   `
   CREATE TABLE users (
     id INTEGER PRIMARY KEY,
@@ -126,13 +129,21 @@ const MIGRATIONS: string[] = [
     INSERT INTO posts_fts(rowid, title, plain_text) VALUES (new.id, new.title, new.plain_text);
   END;
   `,
+  // v2: keterangan foto jadi teks biasa (sebelumnya boleh berisi tautan HTML)
+  (db) => {
+    const rows = db.prepare("SELECT id, feature_image_caption AS c FROM posts WHERE feature_image_caption LIKE '%<%'").all() as { id: number; c: string }[];
+    const upd = db.prepare("UPDATE posts SET feature_image_caption = ? WHERE id = ?");
+    for (const r of rows) upd.run(plainText(r.c), r.id);
+  },
 ];
 
 function migrate(db: DB) {
   const current = db.pragma("user_version", { simple: true }) as number;
   for (let v = current; v < MIGRATIONS.length; v++) {
     db.transaction(() => {
-      db.exec(MIGRATIONS[v]);
+      const m = MIGRATIONS[v];
+      if (typeof m === "string") db.exec(m);
+      else m(db);
       db.pragma(`user_version = ${v + 1}`);
     })();
   }

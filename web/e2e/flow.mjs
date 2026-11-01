@@ -26,6 +26,15 @@ try {
   let ctx = await browser.newContext();
   let page = await ctx.newPage();
   page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => { if (/Content Security Policy|Refused to/i.test(m.text())) errors.push("CSP: " + m.text()); });
+
+  // 0. Validasi form bergaya qiran (bukan balon bawaan browser)
+  await page.goto(BASE + "/admin/masuk/");
+  await page.click("button[type=submit]");
+  check("validasi kosong memakai pesan qiran", await page.locator(".field-error").first().isVisible() && page.url().includes("/admin/masuk/"));
+  await page.fill("#email", "bukan-email");
+  await page.click("button[type=submit]");
+  check("validasi format email", (await page.locator(".field-error").first().textContent()).includes("Format email"));
   await page.goto(BASE + "/admin/masuk/");
   await page.fill("#email", ADMIN.email);
   await page.fill("#password", "salah-sekali-123");
@@ -57,8 +66,28 @@ try {
   await page.waitForSelector(".cover img", { timeout: 15000 });
   check("unggah gambar sampul", (await page.getAttribute(".cover img", "src")).startsWith("/uploads/"));
   await page.click("text=Terbitkan");
-  await page.waitForSelector("text=Tulisan diterbitkan!", { timeout: 10000 });
-  check("terbitkan tulisan", true);
+  await page.waitForSelector(".toast-ok:has-text('Tulisan diterbitkan!')", { timeout: 10000 });
+  check("terbitkan tulisan (notifikasi qiran)", true);
+
+  // Penjaga perubahan belum tersimpan: dialog qiran, bukan dialog browser
+  await page.click(".prose");
+  await page.keyboard.press("End");
+  await page.keyboard.type(" tambahan");
+  await page.click("text=← Kembali");
+  const leave = page.locator(".dialog.confirm[open]");
+  check("dialog 'belum tersimpan' muncul", await leave.isVisible({ timeout: 3000 }).catch(() => false));
+  await leave.locator("text=Simpan lalu pindah").click();
+  await page.waitForURL(/\/admin\/$/, { timeout: 10000 });
+  await page.goto(editUrl);
+  await page.waitForSelector(".prose");
+  check("simpan lalu pindah menyimpan perubahan", (await page.textContent(".prose")).includes("tambahan"));
+
+  // Dialog konfirmasi hapus bisa dibatalkan
+  await page.click("button:has-text('Hapus tulisan')");
+  const del = page.locator(".dialog.confirm[open]");
+  check("konfirmasi hapus memakai dialog qiran", await del.isVisible({ timeout: 3000 }).catch(() => false));
+  await del.locator("button:has-text('Batal')").click();
+  check("batal hapus tetap di editor", page.url() === editUrl);
 
   // 3. Tampil di situs publik dengan stabilo dan tebal
   const pub = await ctx.newPage();
@@ -81,7 +110,7 @@ try {
   const future = new Date(Date.now() + 7 * 86400_000 + 7 * 3600_000).toISOString().slice(0, 16);
   await page.fill("#publishAt", future);
   await page.click("text=Jadwalkan");
-  await page.waitForSelector("text=Tulisan dijadwalkan.", { timeout: 10000 });
+  await page.waitForSelector(".toast:has-text('Tulisan dijadwalkan.')", { timeout: 10000 });
   const anon = await browser.newContext({ userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" });
   const ap = await anon.newPage();
   const r = await ap.goto(BASE + "/tulisan-untuk-minggu-depan/");
@@ -138,7 +167,7 @@ try {
   await adm.goto(BASE + "/admin/pengaturan/");
   await adm.fill("#hero_heading", "Tulisan dari tengah nama.");
   await adm.click("text=Simpan pengaturan");
-  await adm.waitForSelector("text=Pengaturan disimpan.", { timeout: 10000 });
+  await adm.waitForSelector(".toast:has-text('Pengaturan disimpan.')", { timeout: 10000 });
   check("admin menyimpan pengaturan", true);
   await adm.goto(BASE + "/admin/statistik/");
   check("statistik admin mencatat pembaca", Number(await adm.textContent(".stat-num")) >= 1);
@@ -150,6 +179,15 @@ try {
   check("upload ditolak dari situs lain", up2.status() === 403);
   const up3 = await adm.request.post(BASE + "/api/upload/", { multipart: { file: { name: "a.php", mimeType: "image/png", buffer: Buffer.from("<?php echo 1;") } } });
   check("file bukan gambar ditolak", up3.status() === 422);
+
+  // 11b. Hapus tulisan uji lewat dialog konfirmasi
+  await page.goto(editUrl);
+  await page.waitForSelector(".prose");
+  await page.click("button:has-text('Hapus tulisan')");
+  await page.locator(".dialog.confirm[open] button:has-text('Hapus tulisan')").click();
+  await page.waitForURL(/\/admin\/$/, { timeout: 10000 });
+  const gone = await ap.goto(BASE + "/uji-coba-dari-editor-baru/");
+  check("tulisan terhapus setelah dikonfirmasi", gone.status() === 404);
 
   // 12. Keluar
   await page.goto(BASE + "/admin/");

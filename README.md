@@ -37,6 +37,7 @@ Versi pertama memakai Ghost. Konfigurasi Ghost masih ada di repo ini sampai perp
 - [Aplikasi web](web/README.md): fitur, struktur kode, dan perintah
 - [Pemasangan Ghost](docs/PEMASANGAN.md): panduan versi Ghost (lama)
 - [Catatan desain](theme/qiran/DESIGN.md): keputusan desain dan alasannya
+- [Audit keamanan](docs/AUDIT-KEAMANAN.md): hasil pemeriksaan keamanan dan perbaikannya
 
 ## Lisensi
 

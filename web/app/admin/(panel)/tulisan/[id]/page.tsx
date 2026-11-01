@@ -9,12 +9,6 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
   const post = getFullById(Number((await params).id));
   if (!post) notFound();
   if (!canEdit(user, post)) redirect("/admin/");
-  let json: unknown = null;
-  try {
-    json = post.content_json ? JSON.parse(post.content_json) : null;
-  } catch {
-    json = null;
-  }
   return (
     <PostEditor
       initial={{
@@ -22,8 +16,8 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
         type: post.type,
         title: post.title === "Tanpa judul" ? "" : post.title,
         slug: post.slug,
+        slugLocked: !!post.published_at && post.status === "published",
         excerpt: post.excerpt,
-        json,
         html: post.content_html,
         tags: post.tags.map((t) => t.name).join(", "),
         featureImage: post.feature_image,

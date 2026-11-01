@@ -10,7 +10,7 @@ import { setSetting, DEFAULTS, type SettingKey } from "@/lib/settings";
 import { wibInputToIso } from "@/lib/time";
 import { randomBytes } from "node:crypto";
 
-export type FormState = { ok?: boolean; message?: string };
+export type FormState = { ok?: boolean; message?: string; secret?: string; secretLabel?: string };
 
 /* ---------- Masuk / keluar ---------- */
 
@@ -50,7 +50,7 @@ export type EditorPayload = {
   title: string;
   slug: string;
   excerpt: string;
-  json: unknown;
+  html: string;
   tags: string[];
   featureImage: string;
   featureImageAlt: string;
@@ -67,7 +67,8 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
   const existing = getPostById(Number(payload.id));
   if (!existing || !canEdit(user, existing)) return { ok: false, message: "Kamu tidak punya akses ke tulisan ini." };
   if (typeof payload.title !== "string" || !Array.isArray(payload.tags)) return { ok: false, message: "Data tidak valid." };
-  if (payload.json && JSON.stringify(payload.json).length > 1_500_000) return { ok: false, message: "Tulisan terlalu panjang." };
+  if (typeof payload.html !== "string") return { ok: false, message: "Data tidak valid." };
+  if (payload.html.length > 1_000_000) return { ok: false, message: "Tulisan terlalu panjang. Coba bagi menjadi dua tulisan." };
   const featureImage = typeof payload.featureImage === "string" && /^(\/uploads\/|https:\/\/)/.test(payload.featureImage) ? payload.featureImage : "";
 
   let status = existing.status;
@@ -83,6 +84,7 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
   }
   if (payload.intent === "unpublish") status = "draft";
   if (status === "published" && !payload.title.trim()) return { ok: false, message: "Judul wajib diisi sebelum terbit." };
+  if (payload.intent === "publish" && !payload.html.replace(/<[^>]*>/g, "").trim() && !/<img/i.test(payload.html)) return { ok: false, message: "Isi tulisan masih kosong." };
 
   try {
     const saved = savePost({
@@ -90,7 +92,7 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
       title: payload.title,
       slug: payload.slug,
       excerpt: payload.excerpt,
-      json: payload.json ?? undefined,
+      html: payload.html,
       featureImage,
       featureImageAlt: String(payload.featureImageAlt ?? ""),
       featureImageCaption: String(payload.featureImageCaption ?? ""),
@@ -107,7 +109,9 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
       payload.intent === "unpublish" ? "Tulisan ditarik jadi draf." : "Tersimpan.";
     return { ok: true, message, status: saved.status, publishedAt: saved.published_at, slug: saved.slug };
   } catch (e) {
-    return { ok: false, message: e instanceof Error ? e.message : "Gagal menyimpan." };
+    // Detail kesalahan hanya dicatat di log server, pengguna mendapat pesan yang bisa dipahami
+    console.error("[simpan tulisan]", e);
+    return { ok: false, message: "Gagal menyimpan. Coba lagi sebentar. Kalau masih gagal, beri tahu admin." };
   }
 }
 
@@ -128,15 +132,18 @@ export async function openAboutPage() {
 
 /* ---------- Komentar ---------- */
 
-export async function moderateComment(form: FormData) {
+export async function moderateComment(form: FormData): Promise<FormState> {
   const user = await requireUser();
   const comment = getComment(Number(form.get("id")));
-  if (!comment) return;
-  if (user.role !== "admin" && comment.author_id !== user.id) return;
+  if (!comment) return { message: "Komentar tidak ditemukan. Mungkin sudah dihapus." };
+  if (user.role !== "admin" && comment.author_id !== user.id) return { message: "Kamu tidak punya akses ke komentar ini." };
   const action = String(form.get("action"));
+  const done: Record<string, string> = { approved: "Komentar disetujui dan sekarang tampil.", pending: "Komentar disembunyikan.", spam: "Komentar ditandai spam.", delete: "Komentar dihapus." };
   if (action === "delete") deleteComment(comment.id);
   else if (["approved", "pending", "spam"].includes(action)) setStatus(comment.id, action as CommentStatus);
+  else return { message: "Aksi tidak dikenal." };
   revalidatePath("/", "layout");
+  return { ok: true, message: done[action] };
 }
 
 /* ---------- Akun sendiri ---------- */
@@ -203,7 +210,7 @@ export async function manageUser(_prev: FormState, form: FormData): Promise<Form
   if (action === "reset") {
     const password = tempPassword();
     await setPassword(target.id, password);
-    return { ok: true, message: `Password baru untuk ${target.name}: ${password}` };
+    return { ok: true, message: `Password baru untuk ${target.name} dibuat.`, secret: password, secretLabel: `Password baru untuk ${target.name}` };
   }
   if (target.id === admin.id) return { message: "Tidak bisa mengubah peran atau menghapus akunmu sendiri." };
   if (action === "make-admin") setRole(target.id, "admin");
@@ -226,10 +233,21 @@ export async function saveSettings(_prev: FormState, form: FormData): Promise<Fo
   return { ok: true, message: "Pengaturan disimpan." };
 }
 
-export async function saveTag(form: FormData) {
+export async function saveTag(_prev: FormState, form: FormData): Promise<FormState> {
   await requireAdmin();
   const id = Number(form.get("id"));
-  if (form.get("action") === "delete") deleteTag(id);
-  else updateTag(id, { name: String(form.get("name") ?? ""), description: String(form.get("description") ?? "") });
+  if (form.get("action") === "delete") {
+    deleteTag(id);
+    revalidatePath("/", "layout");
+    return { ok: true, message: "Tag dihapus. Tulisannya tetap ada." };
+  }
+  const name = String(form.get("name") ?? "").trim();
+  if (!name) return { message: "Nama tag wajib diisi." };
+  try {
+    updateTag(id, { name, description: String(form.get("description") ?? "") });
+  } catch {
+    return { message: "Nama tag itu sudah dipakai." };
+  }
   revalidatePath("/", "layout");
+  return { ok: true, message: "Tag disimpan." };
 }

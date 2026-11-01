@@ -110,7 +110,7 @@ export default async function PostPage({ params }: Props) {
         {isPost && post.tags.length ? (
           <footer className="article-end reveal">
             <p className="article-tags">
-              Topik:{" "}
+              Tag:{" "}
               {post.tags.map((t, i) => (
                 <span key={t.id}>
                   <a className="textlink" href={`/tag/${t.slug}/`}>{t.name}</a>

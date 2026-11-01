@@ -7,3 +7,5 @@ next-env.d.ts
 *.tsbuildinfo
 /test-results/
 .env.production
+.next-new/
+.next-old/

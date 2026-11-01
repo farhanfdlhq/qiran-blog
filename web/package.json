@@ -16,14 +16,14 @@
     "import:ghost": "tsx scripts/import-ghost.ts",
     "backup": "bash scripts/backup.sh",
     "test:e2e": "node e2e/flow.mjs",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@tiptap/extension-highlight": "3.32.2",
     "@tiptap/extension-image": "3.32.2",
     "@tiptap/extension-link": "3.32.2",
     "@tiptap/extension-placeholder": "3.32.2",
-    "@tiptap/html": "3.32.2",
     "@tiptap/pm": "3.32.2",
     "@tiptap/react": "3.32.2",
     "@tiptap/starter-kit": "3.32.2",

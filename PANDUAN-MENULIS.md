@@ -27,7 +27,7 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 | Judul / Subjudul | Subjudul di dalam tulisan |
 | Kutipan | Kutipan yang ditampilkan lebih besar |
 | • Daftar / 1. Daftar | Daftar berpoin atau bernomor |
-| Tautan | Pilih kata dulu, lalu klik dan tempel alamatnya |
+| Tautan | Pilih kata dulu, klik Tautan, lalu tempel alamatnya di kotak yang muncul |
 | Gambar | Sisipkan gambar di posisi kursor |
 | * * * | Garis pemisah |
 | Urungkan / Ulangi | Membatalkan atau mengulang perubahan |
@@ -35,18 +35,20 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 ### Gambar
 
 - **Gambar sampul:** klik **Tambah gambar sampul** di atas judul. Gambar ini tampil besar di atas tulisan, dan di beranda kalau tulisannya jadi yang terbaru.
-- **Gambar di dalam tulisan:** klik **Gambar** di toolbar. Setelah memilih gambar, isi deskripsi singkatnya, supaya pembaca yang memakai pembaca layar tetap tahu isinya.
+- **Gambar di dalam tulisan:** klik **Gambar** di toolbar. Setelah memilih gambar, isi teks alternatif (gambaran singkat isinya) supaya pembaca yang memakai pembaca layar tetap tahu isinya.
 - Foto dari HP langsung bisa dipakai. Ukurannya otomatis diperkecil dan data lokasi di dalam foto dibuang.
 
 ## Pengaturan di kolom kanan
 
-- **Topik:** misalnya `Opini` atau `Cerita, Puisi`. Pisahkan dengan koma. Topik pertama tampil di daftar tulisan.
+- **Tag:** misalnya `Opini` atau `Cerita, Puisi`. Pisahkan dengan koma. Tag pertama tampil di daftar tulisan.
 - **Ringkasan:** satu atau dua kalimat. Tampil di beranda, di bawah judul, dan saat tulisan dibagikan ke WhatsApp.
 - **Tanggal terbit:** kosongkan untuk terbit sekarang. Isi tanggal yang akan datang untuk menjadwalkan.
 - **Alamat (URL):** otomatis mengikuti judul. Boleh diubah, misalnya `pr-akhir-pekan`.
 - **Izinkan komentar:** matikan kalau tidak ingin tulisan itu dikomentari.
 
-Klik **Pratinjau** untuk melihat tampilan tulisan seperti yang akan dilihat pembaca.
+Klik **Pratinjau** untuk melihat tampilan tulisan seperti yang akan dilihat pembaca. Kalau ada perubahan yang belum tersimpan, perubahan disimpan dulu otomatis.
+
+Kalau pindah halaman sebelum tersimpan, akan muncul pertanyaan: simpan dulu, pindah tanpa menyimpan, atau tetap di halaman.
 
 ## Menerbitkan
 

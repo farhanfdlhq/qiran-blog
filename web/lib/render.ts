@@ -1,7 +1,5 @@
 /** Mengubah isi editor jadi HTML aman untuk ditampilkan. */
 import sanitizeHtml from "sanitize-html";
-import { generateHTML } from "@tiptap/html";
-import { editorExtensions } from "./editor-schema";
 
 const ALLOWED: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -34,18 +32,4 @@ export function sanitize(html: string): string {
   return sanitizeHtml(html, ALLOWED);
 }
 
-export function renderDoc(doc: unknown): string {
-  // generateHTML hanya mengenal node dalam skema editor; hasilnya tetap disaring lagi
-  const html = generateHTML(doc as Parameters<typeof generateHTML>[0], editorExtensions());
-  return sanitize(html);
-}
 
-/** Untuk teks pendek seperti keterangan foto: hanya tautan dan huruf tebal/miring. */
-export function sanitizeInline(html: string): string {
-  return sanitizeHtml(html, {
-    allowedTags: ["a", "em", "i", "strong", "b"],
-    allowedAttributes: { a: ["href", "rel", "target"] },
-    allowedSchemes: ["http", "https", "mailto"],
-    transformTags: { a: (tagName, attribs) => ({ tagName, attribs: { ...attribs, rel: "noopener noreferrer", target: "_blank" } }) },
-  });
-}

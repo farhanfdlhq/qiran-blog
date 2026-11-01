@@ -3,6 +3,7 @@ import { siteSettings } from "@/lib/settings";
 import { listTags } from "@/lib/posts";
 import { saveSettings, saveTag } from "@/app/actions/admin";
 import { ActionForm } from "@/components/admin/ActionForm";
+import { ConfirmButton } from "@/components/admin/ConfirmButton";
 
 export default async function SettingsPage() {
   await requireAdmin();
@@ -39,13 +40,13 @@ export default async function SettingsPage() {
         </ActionForm>
       </section>
       <section className="admin-section">
-        <h2>Topik</h2>
-        <p className="hint" style={{ marginBottom: 12 }}>Topik baru dibuat otomatis dari editor tulisan. Di sini kamu bisa mengganti nama, menambah deskripsi, atau menghapusnya.</p>
+        <h2>Tag</h2>
+        <p className="hint" style={{ marginBottom: 12 }}>Tag baru dibuat otomatis saat diketik di editor tulisan. Di sini kamu bisa mengganti nama, menambah deskripsi, atau menghapusnya.</p>
         {tags.length ? (
           <ul className="list">
             {tags.map((t) => (
               <li className="list-item" key={t.id} style={{ gridTemplateColumns: "1fr" }}>
-                <form action={saveTag} className="form" style={{ maxWidth: "none" }}>
+                <ActionForm action={saveTag} className="form tag-form">
                   <input type="hidden" name="id" value={t.id} />
                   <div className="form-row">
                     <div className="field"><label htmlFor={`tn-${t.id}`}>Nama ({t.count} tulisan terbit)</label><input id={`tn-${t.id}`} name="name" defaultValue={t.name} required maxLength={40} /></div>
@@ -53,13 +54,13 @@ export default async function SettingsPage() {
                   </div>
                   <div className="btn-row">
                     <button className="btn btn-quiet btn-small" type="submit" name="action" value="save">Simpan</button>
-                    <button className="btn btn-danger btn-small" type="submit" name="action" value="delete">Hapus topik</button>
+                    <ConfirmButton name="action" value="delete" danger title={`Hapus tag ${t.name}?`} message="Tag dilepas dari semua tulisan. Tulisannya sendiri tidak terhapus." confirmLabel="Hapus tag">Hapus tag</ConfirmButton>
                   </div>
-                </form>
+                </ActionForm>
               </li>
             ))}
           </ul>
-        ) : <p className="empty">Belum ada topik.</p>}
+        ) : <p className="empty">Belum ada tag.</p>}
       </section>
     </>
   );

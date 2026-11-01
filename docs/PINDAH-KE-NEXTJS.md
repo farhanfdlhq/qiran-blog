@@ -77,7 +77,7 @@ Akun juga bisa ditambah nanti dari panel, di menu **Pengguna**.
 
 ## 5. Isi tulisan contoh
 
-Satu perintah untuk mengisi 6 tulisan contoh, halaman Tentang, topik, dan fotonya. Isinya sama dengan yang sekarang tampil di Ghost:
+Satu perintah untuk mengisi 6 tulisan contoh, halaman Tentang, tag, dan fotonya. Isinya sama dengan yang sekarang tampil di Ghost:
 
 ```bash
 cd /opt/qiran-blog/web && npm run seed
@@ -157,10 +157,18 @@ Isinya salinan database dan semua gambar. Backup lebih dari 14 hari dihapus otom
 ## 10. Update aplikasi nanti
 
 ```bash
-export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog && git pull && cd web && npm ci && npm run build && chown -R www:www .next /opt/qiran-blog/data/web
+cd /opt/qiran-blog/web && ./scripts/deploy.sh
 ```
 
-Lalu klik **Restart** pada project `qiran` di aaPanel Node.js Project.
+Lalu klik **Restart** pada project `qiran` di aaPanel.
+
+Skrip ini membangun versi baru di folder terpisah, jadi situs tetap jalan selama build. Kalau build gagal, situs tidak diubah sama sekali. Kalau setelah restart ada masalah, kembali ke versi sebelumnya:
+
+```bash
+cd /opt/qiran-blog/web && rm -rf .next && mv .next-old .next
+```
+
+lalu Restart lagi.
 
 ---
 

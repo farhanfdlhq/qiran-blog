@@ -4,7 +4,7 @@ Next.js 16 + SQLite, Node 22 atau lebih baru. Satu aplikasi untuk situs publik d
 
 ## Fitur
 
-- **Situs:** beranda, tulisan, topik, penulis, Tentang, pencarian, mode terang/gelap, saring per penulis. Alamat tulisan sama dengan Ghost (`/judul-tulisan/`), jadi tautan lama tetap jalan.
+- **Situs:** beranda, tulisan, tag, penulis, Tentang, pencarian, mode terang/gelap, saring per penulis. Alamat tulisan sama dengan Ghost (`/judul-tulisan/`), jadi tautan lama tetap jalan.
 - **Panel penulis:** editor visual (tebal, miring, stabilo, judul, kutipan, daftar, tautan, gambar), simpan otomatis untuk draf, jadwal terbit (WIB), gambar sampul.
 - **Komentar** tanpa akun pembaca. Komentar baru tampil setelah disetujui, dengan perlindungan spam (honeypot, batas waktu isi, batas jumlah).
 - **Statistik** pembaca per tulisan tanpa cookie. Pengunjung dikenali lewat hash harian yang tidak bisa dibalik, dan bot tidak dihitung.
@@ -55,13 +55,16 @@ Buka http://localhost:3100 dan http://localhost:3100/admin/.
 | `npm run test:e2e` | Uji alur di browser. Butuh server yang sedang jalan, Playwright, dan variabel `ADMIN_EMAIL`, `ADMIN_PW`, `AUTHOR_EMAIL`, `AUTHOR_PW` |
 | `npm run typecheck` | Pemeriksaan TypeScript |
 | `npm run user -- add/reset/list` | Kelola akun dari terminal |
-| `npm run seed` | Isi tulisan contoh, halaman Tentang, dan topik |
+| `npm run seed` | Isi tulisan contoh, halaman Tentang, dan tag |
 | `npm run import:ghost -- ekspor.json [folder-konten-ghost]` | Impor dari Ghost |
 | `npm run backup` | Backup database dan gambar |
+| `npm run deploy` | Update aman di server: build di folder terpisah lalu tukar |
 
 Pemasangan di VPS: lihat [`docs/PINDAH-KE-NEXTJS.md`](../docs/PINDAH-KE-NEXTJS.md).
 
 ## Catatan keamanan
+
+Hasil audit lengkap: [`docs/AUDIT-KEAMANAN.md`](../docs/AUDIT-KEAMANAN.md).
 
 - Password di-hash dengan scrypt. Token sesi disimpan sebagai hash SHA-256, cookie `httpOnly` dan `SameSite=Lax`.
 - Percobaan login dibatasi per IP dan per akun (5 kali dalam 15 menit).

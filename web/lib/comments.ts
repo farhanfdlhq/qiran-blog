@@ -61,3 +61,9 @@ export function countPending(user: { id: number; role: string }): number {
   const where = user.role === "admin" ? "" : "AND p.author_id = @uid";
   return (getDb().prepare(`SELECT COUNT(*) AS n FROM comments c JOIN posts p ON p.id = c.post_id WHERE c.status = 'pending' ${where}`).get({ uid: user.id }) as { n: number }).n;
 }
+
+/** Batas semua komentar baru per jam, untuk meredam banjir spam walau alamat IP dipalsukan. */
+export function recentCommentsTotal(minutes = 60): number {
+  const since = new Date(Date.now() - minutes * 60_000).toISOString();
+  return (getDb().prepare("SELECT COUNT(*) AS n FROM comments WHERE created_at >= ?").get(since) as { n: number }).n;
+}

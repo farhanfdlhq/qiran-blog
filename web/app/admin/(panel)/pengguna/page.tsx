@@ -23,13 +23,13 @@ export default async function UsersPage() {
               <div className="list-meta"><span>{u.email}</span><span>{u.role === "admin" ? "Admin" : "Penulis"}</span><span>{u.post_count} tulisan</span></div>
               <ActionForm action={manageUser} className="btn-row">
                 <input type="hidden" name="id" value={u.id} />
-                <ConfirmButton name="action" value="reset" message={`Buat password baru untuk ${u.name}? Password lama tidak bisa dipakai lagi.`}>Buat password baru</ConfirmButton>
+                <ConfirmButton name="action" value="reset" title={`Buat password baru untuk ${u.name}?`} message="Password lama langsung tidak berlaku dan semua perangkat yang sedang masuk akan keluar." confirmLabel="Buat password baru">Buat password baru</ConfirmButton>
                 {u.id !== me.id ? (
                   <>
                     {u.role === "author"
-                      ? <ConfirmButton name="action" value="make-admin" message={`Jadikan ${u.name} admin?`}>Jadikan admin</ConfirmButton>
-                      : <ConfirmButton name="action" value="make-author" message={`Jadikan ${u.name} penulis biasa?`}>Jadikan penulis</ConfirmButton>}
-                    <ConfirmButton name="action" value="delete" danger message={`Hapus akun ${u.name}? Tulisannya tetap ada, tapi tanpa nama penulis.`}>Hapus akun</ConfirmButton>
+                      ? <ConfirmButton name="action" value="make-admin" title={`Jadikan ${u.name} admin?`} message="Admin bisa mengubah semua tulisan, pengguna, dan pengaturan situs." confirmLabel="Jadikan admin">Jadikan admin</ConfirmButton>
+                      : <ConfirmButton name="action" value="make-author" title={`Jadikan ${u.name} penulis biasa?`} message="Penulis hanya bisa mengelola tulisan dan komentar miliknya sendiri." confirmLabel="Jadikan penulis">Jadikan penulis</ConfirmButton>}
+                    <ConfirmButton name="action" value="delete" danger title={`Hapus akun ${u.name}?`} message="Tulisannya tetap ada, tapi tanpa nama penulis. Tidak bisa dibatalkan." confirmLabel="Hapus akun">Hapus akun</ConfirmButton>
                   </>
                 ) : null}
               </ActionForm>

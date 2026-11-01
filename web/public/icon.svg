@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="qiran">
+  <title>qiran</title>
+  <rect width="64" height="64" rx="15" fill="#161c1a"/>
+  <!-- Huruf q dari dua belahan: Qirana dan Qirani, bertemu di tengah -->
+  <path d="M29 17.5a12.5 12.5 0 0 0 0 25" fill="none" stroke="#e3e2da" stroke-width="7"/>
+  <path d="M29 17.5a12.5 12.5 0 0 1 12.5 12.5a12.5 12.5 0 0 1 -12.5 12.5" fill="none" stroke="#9fc7b8" stroke-width="7"/>
+  <path d="M41.5 18v32" fill="none" stroke="#9fc7b8" stroke-width="7" stroke-linecap="round"/>
+</svg>

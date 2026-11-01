@@ -15,6 +15,8 @@
     --accent: #9fc7b8;
     --accent-ink: #161c1a;
     --mark: #9fc7b8;
+    --danger: #a32616;
+    --danger-bg: #f3d2cc;
 
     /* Bagian yang dibalik (footer): selalu kebalikan dari halaman */
     --inv-bg: #161c1a;
@@ -47,6 +49,8 @@
     --inv-ink: #161c1a;
     --inv-muted: #4d5550;
     --mark: #2f5d50;
+    --danger: #f19a8b;
+    --danger-bg: #4a1f18;
 }
 @media (prefers-color-scheme: dark) {
     :root[data-mode="auto"] {
@@ -58,6 +62,8 @@
         --inv-ink: #161c1a;
         --inv-muted: #4d5550;
         --mark: #2f5d50;
+        --danger: #f19a8b;
+        --danger-bg: #4a1f18;
     }
 }
 
@@ -124,7 +130,7 @@ p { text-wrap: pretty; }
     align-items: baseline; padding: 40px var(--margin) 0;
     font-size: var(--step-body);
 }
-.wordmark { font-weight: 500; font-size: var(--step-lead); line-height: 1; letter-spacing: -.02em; text-decoration: none; }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 500; font-size: var(--step-lead); line-height: 1; letter-spacing: -.02em; text-decoration: none; }
 .wordmark img { height: 32px; width: auto; }
 .topnav .nav { display: flex; gap: 28px; margin: 0; padding: 0; list-style: none; }
 .topnav .nav a {
@@ -472,7 +478,7 @@ p { text-wrap: pretty; }
 .comment-form { display: grid; gap: 16px; margin-top: 40px; }
 .field { display: grid; gap: 6px; }
 .field label { font-size: var(--step-small); color: var(--muted); }
-.field input, .field textarea {
+.field input, .field textarea, .field select {
     width: 100%; padding: 12px 14px; border: 0; border-radius: 6px;
     background: var(--surface); color: var(--ink); font: inherit; font-size: var(--step-body);
 }
@@ -481,6 +487,8 @@ p { text-wrap: pretty; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form-note { margin: 0; font-size: var(--step-small); color: var(--muted); }
 .form-msg { margin: 0; padding: 12px 14px; border-radius: 6px; background: var(--surface); }
+.form-msg-ok { background: var(--accent); color: var(--accent-ink); }
+.form-msg-err { background: var(--danger-bg); color: var(--ink); }
 .btn[disabled] { opacity: .6; cursor: progress; }
 
 /* ---------- Pencarian ---------- */
@@ -490,3 +498,70 @@ p { text-wrap: pretty; }
     background: var(--surface); color: var(--ink); font: inherit; font-size: var(--step-body);
 }
 .search-form input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* =========================================================
+   Notifikasi, dialog, dan pesan validasi (pengganti bawaan browser)
+   ========================================================= */
+
+.toasts {
+    position: fixed; z-index: 100; right: 20px; bottom: 20px; left: auto;
+    display: grid; gap: 10px; width: min(380px, calc(100vw - 40px)); pointer-events: none;
+}
+.toast {
+    pointer-events: auto; display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 12px;
+    padding: 14px 12px 14px 16px; border-radius: 10px;
+    background: var(--inv-bg); color: var(--inv-ink);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 22%);
+    font-size: var(--step-small); line-height: 1.45;
+    animation: toast-in .35s var(--ease-out);
+}
+.toast-mark { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--accent); }
+.toast-err .toast-mark { background: #e07a68; }
+.toast-info .toast-mark { background: var(--inv-muted); }
+.toast-text { margin: 0; font-size: 15px; }
+.toast-close {
+    display: grid; place-items: center; width: 28px; height: 28px; margin: -4px -2px 0 0;
+    border: 0; border-radius: 6px; background: none; color: var(--inv-muted); cursor: pointer;
+}
+.toast-close:hover { color: var(--inv-ink); background: color-mix(in srgb, var(--inv-ink) 12%, transparent); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (max-width: 600px) { .toasts { right: 16px; left: 16px; bottom: 16px; width: auto; } }
+
+.dialog {
+    width: min(460px, calc(100vw - 32px)); padding: 28px; border: 0; border-radius: 14px;
+    background: var(--bg); color: var(--ink); box-shadow: 0 24px 64px rgb(0 0 0 / 28%);
+}
+.dialog[open] { animation: dialog-in .25s var(--ease-out); }
+.dialog::backdrop { background: rgb(22 28 26 / 50%); }
+.dialog-title { margin: 0 0 4px; font: 500 var(--step-lead)/1.1 var(--font-display); letter-spacing: -.02em; }
+.confirm-body { margin: 8px 0 24px; color: var(--muted); font-size: var(--step-body); line-height: 1.5; }
+.dialog .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+.btn-danger-solid { background: #a32616; color: #fff; }
+
+.field-error { margin: 2px 0 0; color: var(--danger); font-size: var(--step-small); }
+[aria-invalid="true"] { outline: 2px solid var(--danger) !important; outline-offset: 1px; }
+
+/* Pilihan (select) dan centang dengan gaya situs */
+select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%234d5550' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px !important;
+}
+input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none; flex-shrink: 0;
+    width: 20px; height: 20px; margin: 0; border-radius: 5px; border: 1.5px solid var(--muted);
+    background: transparent; cursor: pointer; display: inline-grid; place-content: center;
+}
+input[type="checkbox"]::after {
+    content: ""; width: 10px; height: 6px; margin-top: -2px;
+    border-left: 2px solid var(--bg); border-bottom: 2px solid var(--bg); transform: rotate(-45deg) scale(0); transition: transform .15s;
+}
+input[type="checkbox"]:checked { background: var(--ink); border-color: var(--ink); }
+input[type="checkbox"]:checked::after { transform: rotate(-45deg) scale(1); }
+input[type="checkbox"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+input[type="datetime-local"] { color-scheme: light; }
+:root[data-mode="dark"] input[type="datetime-local"] { color-scheme: dark; }
+
+.logo-mark { flex-shrink: 0; border-radius: 22%; }
+.wordmark .logo-mark { width: 1.05em; height: 1.05em; transform: translateY(.06em); }

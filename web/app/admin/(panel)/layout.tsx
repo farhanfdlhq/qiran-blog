@@ -3,6 +3,7 @@ import { countPending } from "@/lib/comments";
 import { siteSettings } from "@/lib/settings";
 import { logout } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { Wordmark } from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   return (
     <div className="admin">
       <aside className="admin-side">
-        <a className="admin-brand" href="/admin/">{s.site_title}</a>
+        <a className="admin-brand" href="/admin/"><Wordmark name={s.site_title} size={30} /></a>
         <AdminNav items={items} />
         <div className="admin-side-foot">
           <span>{user.name}</span>

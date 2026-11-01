@@ -1,5 +1,5 @@
 import { requireUser } from "@/lib/auth";
-import { listForAdmin, isScheduled } from "@/lib/posts";
+import { listForAdmin, isScheduled, cleanupEmptyDrafts } from "@/lib/posts";
 import { formatTanggal, formatWaktu } from "@/lib/time";
 import { createDraft } from "@/app/actions/admin";
 
@@ -10,6 +10,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
   const user = await requireUser();
   const raw = (await searchParams).status;
   const filter: Filter = TABS.some(([k]) => k === raw) ? (raw as Filter) : "semua";
+  cleanupEmptyDrafts(user.id);
   const posts = listForAdmin(user, filter);
 
   return (
@@ -43,6 +44,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
                 <div className="list-side">
                   {p.pending_comments ? <a className="badge" href="/admin/komentar/" title="Komentar menunggu">{p.pending_comments}</a> : null}
                   <span>{p.views} pembaca</span>
+                  {p.status === "published" && !scheduled ? <a className="textlink" href={`/${p.slug}/`} target="_blank" rel="noopener">Lihat</a> : null}
                 </div>
               </li>
             );

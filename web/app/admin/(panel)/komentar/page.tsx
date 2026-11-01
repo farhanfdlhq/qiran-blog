@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { listForModeration, type CommentStatus } from "@/lib/comments";
 import { formatTanggal, formatWaktu } from "@/lib/time";
-import { moderateComment } from "@/app/actions/admin";
+import { ModerateButtons } from "@/components/admin/ModerateButtons";
 
 const TABS: [CommentStatus, string][] = [["pending", "Menunggu"], ["approved", "Disetujui"], ["spam", "Spam"]];
 
@@ -10,13 +10,6 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
   const raw = (await searchParams).status;
   const status: CommentStatus = TABS.some(([k]) => k === raw) ? (raw as CommentStatus) : "pending";
   const items = listForModeration(user, status);
-  const btn = (id: number, action: string, label: string, cls = "btn btn-quiet btn-small") => (
-    <form action={moderateComment} className="inline-form">
-      <input type="hidden" name="id" value={id} />
-      <input type="hidden" name="action" value={action} />
-      <button className={cls} type="submit">{label}</button>
-    </form>
-  );
   return (
     <>
       <div className="admin-head">
@@ -40,11 +33,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
                 <span>di <a className="textlink" href={`/${c.post_slug}/`} target="_blank" rel="noopener">{c.post_title}</a></span>
               </div>
               <p className="comment-body" style={{ margin: "6px 0 10px" }}>{c.body}</p>
-              <div className="btn-row">
-                {status !== "approved" ? btn(c.id, "approved", "Setujui", "btn btn-small") : btn(c.id, "pending", "Sembunyikan")}
-                {status !== "spam" ? btn(c.id, "spam", "Tandai spam") : null}
-                {btn(c.id, "delete", "Hapus", "btn btn-danger btn-small")}
-              </div>
+              <ModerateButtons id={c.id} status={status} />
             </li>
           ))}
         </ul>

@@ -1,5 +1,5 @@
 /**
- * Isi blog dengan tulisan contoh, halaman Tentang, dan topik (beserta fotonya).
+ * Isi blog dengan tulisan contoh, halaman Tentang, dan tag (beserta fotonya).
  *   npm run seed                          (semua atas nama admin pertama)
  *   npm run seed -- --author email@contoh.id
  * Aman dijalankan ulang: tulisan yang alamatnya sudah ada akan dilewati.
