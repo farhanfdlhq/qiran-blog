@@ -4,6 +4,13 @@ import { formatTanggal } from "@/lib/time";
 import { readingMinutes, jsonLd as toJsonLd } from "@/lib/text";
 import { imgSrcSet, postPath, siteUrl } from "@/lib/site";
 import { ArchiveList } from "@/components/PostList";
+import { shareMeta } from "@/lib/meta";
+import type { Metadata } from "next";
+
+export function generateMetadata(): Metadata {
+  const s = siteSettings();
+  return { alternates: { canonical: "/" }, ...shareMeta({ title: s.site_title, description: s.site_description, path: "/" }) };
+}
 
 export default function Home() {
   const s = siteSettings();

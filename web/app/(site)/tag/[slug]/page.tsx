@@ -3,13 +3,18 @@ import type { Metadata } from "next";
 import { getTagBySlug, listPublished } from "@/lib/posts";
 import { siteSettings } from "@/lib/settings";
 import { ArchiveList } from "@/components/PostList";
+import { shareMeta } from "@/lib/meta";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tag = getTagBySlug((await params).slug);
   if (!tag) return {};
-  return { title: `Tag ${tag.name}`, description: tag.description || undefined, alternates: { canonical: `/tag/${tag.slug}/` } };
+  const s = siteSettings();
+  const title = `Tag ${tag.name}`;
+  const description = tag.description || `Tulisan bertag ${tag.name} di ${s.site_title}.`;
+  const url = `/tag/${tag.slug}/`;
+  return { title, description, alternates: { canonical: url }, ...shareMeta({ title: `${title} · ${s.site_title}`, description, path: url }) };
 }
 
 export default async function TagPage({ params }: Props) {

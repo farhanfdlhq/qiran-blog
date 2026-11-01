@@ -121,6 +121,8 @@ try {
   const ap = await anon.newPage();
   const r = await ap.goto(BASE + "/tulisan-untuk-minggu-depan/");
   check("tulisan terjadwal belum tampil untuk pembaca", r.status() === 404);
+  const ogDraft = await ap.request.get(BASE + "/og/tulisan-untuk-minggu-depan.jpg");
+  check("gambar pratinjau tulisan terjadwal tidak tersedia", ogDraft.status() === 404);
   const r2 = await pub.goto(BASE + "/tulisan-untuk-minggu-depan/");
   check("penulis bisa pratinjau tulisan terjadwal", r2.status() === 200 && (await pub.textContent("body")).includes("Pratinjau"));
 
@@ -162,6 +164,11 @@ try {
 
   // 9. Statistik: kunjungan tercatat
   await ap.goto(BASE + "/hujan-di-halte/");
+  const ogUrl = await ap.getAttribute('meta[property="og:image"]', "content");
+  const ogRes = ogUrl ? await ap.request.get(BASE + new URL(ogUrl).pathname + new URL(ogUrl).search) : null;
+  const ogBody = ogRes ? await ogRes.body() : Buffer.alloc(0);
+  check("gambar pratinjau tulisan berupa JPEG kecil", !!ogRes && ogRes.headers()["content-type"] === "image/jpeg" && ogBody.length > 5000 && ogBody.length < 300_000, `${ogUrl} ${ogBody.length}`);
+  check("tag Open Graph lengkap", (await ap.locator('meta[property="og:site_name"], meta[property="og:url"], meta[property="og:image:width"], meta[name="twitter:card"]').count()) === 4);
   await ap.waitForTimeout(2500);
   await page.goto(BASE + "/admin/statistik/");
   check("halaman statistik terbuka", (await page.textContent("h1")).includes("Statistik"));

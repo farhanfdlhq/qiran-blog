@@ -5,13 +5,18 @@ import { listPublished } from "@/lib/posts";
 import { siteSettings } from "@/lib/settings";
 import { imgVariant } from "@/lib/site";
 import { ArchiveList } from "@/components/PostList";
+import { shareMeta } from "@/lib/meta";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const u = getUserBySlug((await params).slug);
   if (!u) return {};
-  return { title: `Tulisan ${u.name}`, description: u.bio || undefined, alternates: { canonical: `/author/${u.slug}/` } };
+  const s = siteSettings();
+  const title = `Tulisan ${u.name}`;
+  const description = u.bio || `Semua tulisan ${u.name} di ${s.site_title}.`;
+  const url = `/author/${u.slug}/`;
+  return { title, description, alternates: { canonical: url }, ...shareMeta({ title: `${title} · ${s.site_title}`, description, path: url }) };
 }
 
 export default async function AuthorPage({ params }: Props) {

@@ -354,3 +354,15 @@ describe("aksi massal tulisan", () => {
     expect(posts.getPostById(p3.id)).not.toBeNull();
   });
 });
+
+describe("gambar pratinjau", async () => {
+  const { ogVersion, ogImagePath } = await import("@/lib/og");
+  const base = { slug: "hujan", type: "post" as const, title: "Hujan", feature_image: "", published_at: "2026-10-27T09:00:00.000Z", author: null, tags: [] };
+
+  it("versi tetap selama isi kartu sama, berubah saat judul berubah", () => {
+    freshDataDir();
+    expect(ogVersion(base, "qiran")).toBe(ogVersion({ ...base }, "qiran"));
+    expect(ogVersion({ ...base, title: "Hujan deras" }, "qiran")).not.toBe(ogVersion(base, "qiran"));
+    expect(ogImagePath(base, "qiran")).toMatch(/^\/og\/hujan\.jpg\?v=[0-9a-f]{10}$/);
+  });
+});

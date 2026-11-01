@@ -41,7 +41,7 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 ## Pengaturan di kolom kanan
 
 - **Tag:** misalnya `Opini` atau `Cerita, Puisi`. Pisahkan dengan koma. Tag pertama tampil di daftar tulisan.
-- **Ringkasan:** satu atau dua kalimat. Tampil di beranda, di bawah judul, dan saat tulisan dibagikan ke WhatsApp.
+- **Ringkasan:** satu atau dua kalimat. Tampil di beranda, di bawah judul, dan di kartu pratinjau saat tulisan dibagikan.
 - **Tanggal terbit:** kosongkan untuk terbit sekarang. Isi tanggal yang akan datang untuk menjadwalkan.
 - **Alamat (URL):** otomatis mengikuti judul. Boleh diubah, misalnya `pr-akhir-pekan`.
 - **Izinkan komentar:** matikan kalau tidak ingin tulisan itu dikomentari.
@@ -66,6 +66,18 @@ Di halaman **Tulisan**, centang kotak di kiri setiap tulisan, atau centang **Pil
 - **Hapus:** menghapus tulisan beserta komentar dan statistiknya. Selalu ada konfirmasi dulu.
 
 Untuk menghapus satu tulisan, klik **Hapus** di ujung kanan barisnya.
+
+## Membagikan tulisan
+
+Di bawah setiap tulisan ada tombol **WhatsApp**, **Salin tautan**, dan (di HP) **Lainnya**. Saat tautan ditempel di WhatsApp, Instagram, X, Facebook, Telegram, atau LinkedIn, muncul kartu pratinjau yang dibuat otomatis: judul, nama penulis, tanggal, tag pertama, dan gambar sampul.
+
+Supaya kartunya bagus:
+
+- Pakai **gambar sampul**. Tanpa gambar sampul, kartu tetap tampil tapi hanya berisi tulisan.
+- Isi **Ringkasan**. Teks ini tampil di bawah judul pada kartu.
+- Judul yang terlalu panjang dipotong setelah empat baris.
+
+Kalau judul atau gambar sampul diubah setelah tulisan pernah dibagikan, kartu ikut diperbarui. WhatsApp kadang masih menampilkan versi lama untuk tautan yang sama selama beberapa jam.
 
 ## Komentar
 

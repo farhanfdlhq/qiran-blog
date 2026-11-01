@@ -58,7 +58,7 @@ function existingHtml(id?: number): string {
 }
 
 /** Alamat yang dipakai halaman lain di situs, tidak boleh dipakai tulisan */
-export const RESERVED_SLUGS = new Set(["admin", "api", "cari", "tag", "author", "page", "uploads", "rss", "sitemap", "robots", "assets", "favicon", "manifest", "logo"]);
+export const RESERVED_SLUGS = new Set(["admin", "api", "cari", "tag", "author", "page", "uploads", "rss", "sitemap", "robots", "assets", "favicon", "manifest", "logo", "og"]);
 
 function uniqueSlug(base: string, ignoreId?: number): string {
   const db = getDb();

@@ -10,6 +10,8 @@ import { imgSrcSet, postPath, siteUrl } from "@/lib/site";
 import { Row } from "@/components/PostList";
 import { CommentForm } from "@/components/CommentForm";
 import { ShareButtons } from "@/components/ShareButtons";
+import { shareMeta } from "@/lib/meta";
+import { ogImagePath } from "@/lib/og";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -28,24 +30,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!found) return {};
   const { post, preview } = found;
   const description = excerptOf(post, 200);
-  const image = post.feature_image ? siteUrl(post.feature_image) : undefined;
+  const s = siteSettings();
+  const isPost = post.type === "post";
+  // Draf dan pratinjau tidak dapat gambar khusus: rute /og/ hanya melayani tulisan terbit
+  const image = preview ? undefined : { url: ogImagePath(post, s.site_title), alt: post.title };
   return {
     title: post.title,
     description,
     alternates: { canonical: postPath(post.slug) },
     robots: preview ? { index: false, follow: false } : undefined,
-    openGraph: {
-      type: post.type === "post" ? "article" : "website",
+    ...shareMeta({
       title: post.title,
       description,
-      url: postPath(post.slug),
-      images: image ? [{ url: image, alt: post.feature_image_alt || post.title }] : undefined,
-      publishedTime: post.published_at ?? undefined,
-      modifiedTime: post.updated_at,
-      authors: post.author ? [post.author.name] : undefined,
-      tags: post.tags.map((t) => t.name),
-    },
-    twitter: { card: image ? "summary_large_image" : "summary", title: post.title, description, images: image ? [image] : undefined },
+      path: postPath(post.slug),
+      image,
+      article: isPost
+        ? {
+            publishedTime: post.published_at ?? undefined,
+            modifiedTime: post.updated_at,
+            authors: post.author ? [siteUrl(`/author/${post.author.slug}/`)] : undefined,
+            tags: post.tags.map((t) => t.name),
+          }
+        : undefined,
+    }),
   };
 }
 
@@ -65,7 +72,7 @@ export default async function PostPage({ params }: Props) {
         "@type": "BlogPosting",
         headline: post.title,
         description: excerptOf(post, 200),
-        image: post.feature_image ? [siteUrl(post.feature_image)] : undefined,
+        image: [post.feature_image ? siteUrl(post.feature_image) : siteUrl(ogImagePath(post, s.site_title))],
         datePublished: post.published_at,
         dateModified: post.updated_at,
         author: post.author ? { "@type": "Person", name: post.author.name, url: siteUrl(`/author/${post.author.slug}/`) } : undefined,

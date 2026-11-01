@@ -178,4 +178,6 @@ Kalau skrip tidak menemukan cara restart otomatis, skrip memberi tahu, dan kamu 
 | 502 Bad Gateway | Aplikasi belum jalan. Lihat log project di aaPanel, atau jalankan `cd /opt/qiran-blog/web && npm run start` untuk melihat error. |
 | Tidak bisa login, kembali ke halaman masuk | Buka lewat `https://qiran.my.id`, bukan lewat IP atau `http://`. Cookie login hanya dikirim lewat https. Pastikan juga Proxy Project mengirim header `Host $host`. |
 | Upload gambar gagal | Folder `DATA_DIR` harus bisa ditulis oleh user yang menjalankan project. |
+| Pratinjau WhatsApp/Facebook memakai gambar umum, bukan kartu tulisan | Server perlu bisa mengunduh font dari `api.fontshare.com` sekali (disimpan di `DATA_DIR/cache/fonts`). Lihat log project untuk baris `[og]`. |
+| Pratinjau di WhatsApp masih versi lama | WhatsApp menyimpan pratinjau. Tes dengan menambah `?v=2` di ujung tautan, atau perbarui lewat [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) (klik **Scrape Again**). |
 | Gambar lama dari Ghost tidak muncul | Jalankan ulang impor dengan argumen folder konten Ghost (`/opt/qiran-blog/data/ghost`). |

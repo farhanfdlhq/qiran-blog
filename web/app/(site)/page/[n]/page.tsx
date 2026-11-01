@@ -2,12 +2,20 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { listPublished } from "@/lib/posts";
 import { ArchiveList } from "@/components/PostList";
+import { siteSettings } from "@/lib/settings";
+import { shareMeta } from "@/lib/meta";
 
 type Props = { params: Promise<{ n: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { n } = await params;
-  return { title: `Semua tulisan, halaman ${n}`, alternates: { canonical: `/page/${n}/` } };
+  const s = siteSettings();
+  const title = `Semua tulisan, halaman ${n}`;
+  return {
+    title,
+    alternates: { canonical: `/page/${n}/` },
+    ...shareMeta({ title: `${title} · ${s.site_title}`, description: s.site_description, path: `/page/${n}/` }),
+  };
 }
 
 export default async function Paged({ params }: Props) {
