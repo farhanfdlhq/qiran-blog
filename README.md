@@ -140,6 +140,15 @@ Lalu, di panel Ghost:
 
 Teks besar di beranda bisa diubah di **Settings → Design & branding → Customize → Homepage**.
 
+### Email masuk untuk @qiran.my.id (opsional)
+
+Akun Owner Ghost memakai `qiran@qiran.my.id`, yang ditampung oleh Mail Server aaPanel di VPS yang sama. Ghost tetap **mengirim** email lewat Gmail (SMTP di `.env`).
+
+1. Cloudflare DNS: `A mail → IP VPS` dengan **DNS only** (awan abu-abu).
+2. aaPanel **Mail Server → Mail Domain → Add Domain**, pilih **Manual**, A record `mail.qiran.my.id`.
+3. Klik **DNS Record** di baris domain, lalu salin MX, SPF, DKIM, dan DMARC ke Cloudflare. DKIM wajib lewat tombol **Copy**.
+4. **Mailboxes → Add** `qiran@qiran.my.id`. Email masuk bisa dibaca di **Mail Server → Email → Inbox**.
+
 ### 7. Backup otomatis
 
 Di aaPanel: **Cron → Add task**, tipe *Shell Script*, jadwal harian jam 03:00:
