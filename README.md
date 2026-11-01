@@ -25,15 +25,18 @@ Desainnya sengaja sederhana dan fokus ke tulisan: huruf besar, satu jenis huruf 
 
 ## Dibangun dengan
 
-- [Ghost](https://ghost.org) sebagai platform blog dan panel menulis
-- Tema `qiran` yang dibuat khusus untuk blog ini
-- Docker di VPS dengan aaPanel, Cloudflare untuk DNS dan SSL
+- Aplikasi sendiri di folder [`web/`](web/): Next.js dan SQLite, dengan panel penulis dan editor visual
+- aaPanel di VPS, Cloudflare untuk DNS dan SSL
+
+Versi pertama memakai Ghost. Konfigurasi Ghost masih ada di repo ini sampai perpindahan selesai.
 
 ## Dokumen lain
 
 - [Panduan menulis](PANDUAN-MENULIS.md): untuk Qirana dan Qirani, cara menulis dan menerbitkan tulisan
-- [Pemasangan dan perawatan](docs/PEMASANGAN.md): cara menjalankan, update, dan backup blog di server
-- [Catatan desain](theme/qiran/DESIGN.md): keputusan desain tema dan alasannya
+- [Pindah ke aplikasi sendiri](docs/PINDAH-KE-NEXTJS.md): pemasangan aplikasi Next.js di VPS dan perpindahan dari Ghost
+- [Aplikasi web](web/README.md): fitur, struktur kode, dan perintah
+- [Pemasangan Ghost](docs/PEMASANGAN.md): panduan versi Ghost (lama)
+- [Catatan desain](theme/qiran/DESIGN.md): keputusan desain dan alasannya
 
 ## Lisensi
 

@@ -4,72 +4,84 @@ Untuk Qirana dan Qirani. Blog ini milik kalian berdua: kalian yang menulis, memi
 
 ## Masuk
 
-1. Buka **qiran.my.id/ghost** di HP atau laptop.
-2. Masuk dengan email dan password kalian.
-3. Kalau masuk dari perangkat baru, Ghost mengirim kode ke email. Buka email, salin kodenya.
+1. Buka **qiran.my.id/admin** di HP atau laptop. Bisa juga lewat tautan "Masuk ke panel" di bagian bawah situs.
+2. Masuk dengan email dan password dari kakak.
+3. Setelah masuk pertama kali, buka **Akun saya** lalu ganti password dengan milik kalian sendiri.
+
+Lupa password? Minta kakak membuat password baru dari menu **Pengguna**.
 
 ## Menulis tulisan baru
 
-1. Klik **Posts → New post** (atau tombol **+**).
-2. Tulis judul di baris paling atas. Judul yang pendek terlihat paling bagus di blog ini: tema akan membesarkan judul sampai muat dua baris.
-3. Tulis isinya di bawah judul. Tulisan tersimpan otomatis sebagai **draf**.
+1. Di halaman **Tulisan**, klik **Tulis baru**.
+2. Tulis judul di kolom paling atas. Judul pendek terlihat paling bagus, karena tema membesarkan judul sampai muat dua baris.
+3. Tulis isinya di bawah toolbar.
 
-Draf hanya bisa dilihat oleh kalian. Tidak ada yang bisa membacanya sampai kalian menekan **Publish**.
+Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa detik setelah kalian berhenti mengetik (lihat tulisan "Tersimpan" di bagian atas). Draf hanya bisa dilihat kalian, tidak oleh pembaca.
 
-### Format yang sering dipakai
+### Toolbar
 
-Blok teks lalu pilih dari menu kecil yang muncul:
-
-| Ingin | Caranya |
+| Tombol | Fungsi |
 | --- | --- |
-| Subjudul | Pilih **H2** (atau ketik `## ` di awal baris) |
-| Tebal | **B** atau Ctrl/Cmd + B |
-| Miring | *I* atau Ctrl/Cmd + I |
-| Menandai kata penting | Ikon **stabilo** (highlight). Tampil dengan latar hijau giok |
-| Kutipan besar | Ikon tanda kutip. Klik dua kali untuk gaya kutipan alternatif |
-| Tautan | Ikon rantai, lalu tempel alamatnya |
-| Daftar | Ketik `- ` atau `1. ` di awal baris |
-
-Ketik **/** di baris kosong untuk menambahkan gambar, galeri, garis pemisah, embed YouTube, dan lainnya.
+| **B** / *I* | Tebal / miring (juga bisa Ctrl+B / Ctrl+I) |
+| Stabilo | Menandai kata penting dengan latar hijau |
+| Judul / Subjudul | Subjudul di dalam tulisan |
+| Kutipan | Kutipan yang ditampilkan lebih besar |
+| • Daftar / 1. Daftar | Daftar berpoin atau bernomor |
+| Tautan | Pilih kata dulu, lalu klik dan tempel alamatnya |
+| Gambar | Sisipkan gambar di posisi kursor |
+| * * * | Garis pemisah |
+| Urungkan / Ulangi | Membatalkan atau mengulang perubahan |
 
 ### Gambar
 
-- **Gambar sampul**: klik **Add feature image** di atas judul. Gambar ini tampil besar di atas tulisan dan di beranda saat tulisannya jadi yang terbaru.
-- **Gambar di dalam tulisan**: ketik **/** lalu pilih **Image**. Gambar bisa dibuat lebih lebar dengan tombol *wide* atau *full* di bawahnya.
-- Isi **alt text** (deskripsi gambar) supaya pembaca yang memakai pembaca layar tetap tahu isinya.
-- Pakai foto buatan sendiri, atau foto gratis dari Unsplash (tersedia langsung di menu gambar Ghost).
+- **Gambar sampul:** klik **Tambah gambar sampul** di atas judul. Gambar ini tampil besar di atas tulisan, dan di beranda kalau tulisannya jadi yang terbaru.
+- **Gambar di dalam tulisan:** klik **Gambar** di toolbar. Setelah memilih gambar, isi deskripsi singkatnya, supaya pembaca yang memakai pembaca layar tetap tahu isinya.
+- Foto dari HP langsung bisa dipakai. Ukurannya otomatis diperkecil dan data lokasi di dalam foto dibuang.
 
-## Sebelum terbit
+## Pengaturan di kolom kanan
 
-Klik ikon **pengaturan** (kotak di kanan atas) untuk:
+- **Topik:** misalnya `Opini` atau `Cerita, Puisi`. Pisahkan dengan koma. Topik pertama tampil di daftar tulisan.
+- **Ringkasan:** satu atau dua kalimat. Tampil di beranda, di bawah judul, dan saat tulisan dibagikan ke WhatsApp.
+- **Tanggal terbit:** kosongkan untuk terbit sekarang. Isi tanggal yang akan datang untuk menjadwalkan.
+- **Alamat (URL):** otomatis mengikuti judul. Boleh diubah, misalnya `pr-akhir-pekan`.
+- **Izinkan komentar:** matikan kalau tidak ingin tulisan itu dikomentari.
 
-- **Post URL**: alamat tulisan. Buat pendek, misalnya `pr-akhir-pekan`.
-- **Tags**: topik tulisan, misalnya *Opini*, *Cerita*, *Puisi*, *Belajar*, *Review*. Tag pertama tampil di daftar tulisan.
-- **Excerpt**: ringkasan satu atau dua kalimat. Tampil di beranda, di bawah judul, dan saat tulisan dibagikan ke WhatsApp atau media sosial.
-- **Publish date**: biarkan kosong, atau isi tanggal lain kalau mau menjadwalkan.
-
-Klik **Preview** untuk melihat tampilannya di HP dan desktop.
+Klik **Pratinjau** untuk melihat tampilan tulisan seperti yang akan dilihat pembaca.
 
 ## Menerbitkan
 
-Klik **Publish → Continue → Publish post, right now**. Pilih **Schedule for later** kalau mau terbit di jam tertentu.
+- **Terbitkan:** tulisan langsung tampil di situs.
+- **Jadwalkan:** muncul kalau tanggal terbit diisi untuk waktu yang akan datang. Tulisan tampil otomatis saat waktunya tiba.
+- **Perbarui:** untuk tulisan yang sudah terbit. Perubahan langsung tampil.
+- **Tarik jadi draf:** menyembunyikan lagi tulisan yang sudah terbit.
 
-Tulisan yang sudah terbit tetap bisa diedit kapan saja. Perubahan langsung tampil setelah klik **Update**. Kalau berubah pikiran, klik **Unpublish** dan tulisan kembali jadi draf.
+## Komentar
 
-## Halaman "Tentang"
+Komentar pembaca **tidak langsung tampil**. Komentar baru masuk ke menu **Komentar** (ada angka di sampingnya). Di sana kalian bisa:
 
-Halaman **Tentang** (menu **Pages**) tampil di alamat qiran.my.id/tentang dan juga di bagian bawah beranda. Tulis siapa kalian dan apa yang kalian tulis di blog ini. Pakai stabilo untuk menandai beberapa kata penting, karena tampilannya dibuat khusus untuk itu.
+- **Setujui:** komentar tampil di bawah tulisan.
+- **Tandai spam:** untuk iklan atau komentar aneh.
+- **Hapus:** untuk komentar yang tidak pantas.
 
-## Profil penulis
+Kalau ada komentar yang membuat tidak nyaman, hapus saja dan ceritakan ke kakak.
 
-Klik foto/inisial kalian di kiri bawah → **Your profile**. Isi nama (cukup nama depan), bio singkat, dan foto profil kalau mau. Foto profil tampil sebagai bulatan kecil di sebelah judul tulisan. Kalau kosong, bulatannya berwarna hijau.
+## Statistik
+
+Menu **Statistik** menunjukkan berapa orang yang membaca tulisan kalian dan tulisan mana yang paling banyak dibaca. Satu orang dihitung sekali per hari per tulisan. Tidak ada data pribadi pembaca yang disimpan.
+
+## Halaman Tentang
+
+Menu **Halaman Tentang** membuka editor untuk halaman qiran.my.id/tentang, yang juga tampil di bagian bawah beranda. Tulis siapa kalian dan apa yang kalian tulis di blog ini. Pakai stabilo untuk menandai beberapa kata penting.
+
+## Profil
+
+Di **Akun saya**, isi nama yang tampil (cukup nama depan), bio singkat, dan foto profil kalau mau. Foto profil tampil sebagai bulatan kecil di sebelah judul tulisan.
 
 ## Jaga privasi
 
 - Cukup pakai nama depan.
 - Jangan tulis nama sekolah, alamat, atau jadwal kegiatan.
 - Hati-hati dengan foto: wajah, seragam berlogo, nomor rumah, plat kendaraan.
-- Kalau ada komentar yang tidak enak, kalian bisa menyembunyikannya, dan ceritakan ke kakak.
 
 ## Ide kalau sedang buntu
 

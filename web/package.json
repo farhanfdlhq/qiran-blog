@@ -1,0 +1,46 @@
+{
+  "name": "qiran-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Blog qiran.my.id: Next.js + SQLite",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev -p 3100",
+    "build": "next build",
+    "start": "node --max-old-space-size=192 node_modules/next/dist/bin/next start -p ${PORT:-3100}",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "user": "tsx scripts/user.ts",
+    "import:ghost": "tsx scripts/import-ghost.ts",
+    "backup": "bash scripts/backup.sh",
+    "test:e2e": "node e2e/flow.mjs"
+  },
+  "dependencies": {
+    "@tiptap/extension-highlight": "3.32.2",
+    "@tiptap/extension-image": "3.32.2",
+    "@tiptap/extension-link": "3.32.2",
+    "@tiptap/extension-placeholder": "3.32.2",
+    "@tiptap/html": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/react": "3.32.2",
+    "@tiptap/starter-kit": "3.32.2",
+    "better-sqlite3": "13.0.3",
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sanitize-html": "2.18.1",
+    "sharp": "0.35.5",
+    "tsx": "4.23.15"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/sanitize-html": "2.16.2",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}
