@@ -2,6 +2,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 import os from "node:os";
 import fs from "node:fs";
 import path from "node:path";
+import { randomBytes } from "node:crypto";
+
+// Password tes dibuat acak saat tes berjalan, tidak ada password tertulis di kode
+const PW = randomBytes(12).toString("hex");
 
 // Setiap tes memakai database baru di folder sementara
 function freshDataDir() {
@@ -73,9 +77,9 @@ describe("render", async () => {
 describe("passwords", async () => {
   const { hashPassword, verifyPassword } = await import("@/lib/passwords");
   it("hash dan verifikasi password", async () => {
-    const h = await hashPassword("rahasia-panjang-123");
-    expect(h).not.toContain("rahasia");
-    expect(await verifyPassword("rahasia-panjang-123", h)).toBe(true);
+    const h = await hashPassword(PW);
+    expect(h).not.toContain(PW);
+    expect(await verifyPassword(PW, h)).toBe(true);
     expect(await verifyPassword("salah", h)).toBe(false);
     expect(await verifyPassword("x", "rusak")).toBe(false);
   });
@@ -104,8 +108,8 @@ describe("database: tulisan, tag, jadwal, pencarian", () => {
   async function setup() {
     const users = await import("@/lib/users");
     const posts = await import("@/lib/posts");
-    const a = await users.createUser({ email: "qirana@contoh.id", name: "Qirana", role: "author", password: "password-qirana-1" });
-    const b = await users.createUser({ email: "qirani@contoh.id", name: "Qirani", role: "author", password: "password-qirani-1" });
+    const a = await users.createUser({ email: "qirana@contoh.id", name: "Qirana", role: "author", password: PW });
+    const b = await users.createUser({ email: "qirani@contoh.id", name: "Qirani", role: "author", password: PW });
     return { users, posts, a, b };
   }
 
@@ -152,7 +156,7 @@ describe("database: tulisan, tag, jadwal, pencarian", () => {
 
   it("penulis hanya boleh mengedit tulisannya sendiri, admin boleh semua", async () => {
     const { posts, users, a, b } = await setup();
-    const admin = await users.createUser({ email: "admin@contoh.id", name: "Kakak", role: "admin", password: "password-admin-1" });
+    const admin = await users.createUser({ email: "admin@contoh.id", name: "Kakak", role: "admin", password: PW });
     const p = posts.savePost({ title: "Punya Qirana", authorId: a.id, status: "draft", html: "<p>x</p>", tags: [] });
     expect(posts.canEdit(a, p)).toBe(true);
     expect(posts.canEdit(b, p)).toBe(false);
@@ -169,8 +173,8 @@ describe("akun dan sesi", () => {
   it("login benar membuat sesi, sesi bisa dicabut", async () => {
     const users = await import("@/lib/users");
     const sessions = await import("@/lib/sessions");
-    await users.createUser({ email: "Qirana@Contoh.id", name: "Qirana", role: "author", password: "password-qirana-1" });
-    const u = await users.authenticate("qirana@contoh.id", "password-qirana-1");
+    await users.createUser({ email: "Qirana@Contoh.id", name: "Qirana", role: "author", password: PW });
+    const u = await users.authenticate("qirana@contoh.id", PW);
     expect(u?.name).toBe("Qirana");
     expect(await users.authenticate("qirana@contoh.id", "salah")).toBeNull();
 
@@ -210,7 +214,7 @@ describe("komentar", () => {
     const users = await import("@/lib/users");
     const posts = await import("@/lib/posts");
     const comments = await import("@/lib/comments");
-    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: "password-qirana-1" });
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
     const p = posts.savePost({ title: "T", authorId: a.id, status: "published", publishedAt: new Date(Date.now() - 1000).toISOString(), html: "<p>x</p>", tags: [] });
     const c = comments.addComment({ postId: p.id, name: "Budi", body: "Halo <b>kak</b>", ipHash: "h" });
     expect(comments.listApproved(p.id)).toHaveLength(0);
@@ -231,7 +235,7 @@ describe("statistik", () => {
     const users = await import("@/lib/users");
     const posts = await import("@/lib/posts");
     const stats = await import("@/lib/stats");
-    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: "password-qirana-1" });
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
     const p = posts.savePost({ title: "T", authorId: a.id, status: "published", publishedAt: new Date(Date.now() - 1000).toISOString(), html: "<p>x</p>", tags: [] });
     stats.recordView(p.id, "10.0.0.1", "Mozilla/5.0");
     stats.recordView(p.id, "10.0.0.1", "Mozilla/5.0");
@@ -253,7 +257,7 @@ describe("alamat tulisan", () => {
   it("alamat draf mengikuti judul, alamat tulisan terbit tidak berubah", async () => {
     const users = await import("@/lib/users");
     const posts = await import("@/lib/posts");
-    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: "password-qirana-1" });
+    const a = await users.createUser({ email: "a@contoh.id", name: "Qirana", role: "author", password: PW });
     const draft = posts.savePost({ title: "Tanpa judul", authorId: a.id, status: "draft", html: "", tags: [] });
     expect(draft.slug).toBe("tanpa-judul");
     const renamed = posts.savePost({ id: draft.id, title: "Judul sebenarnya", slug: "", authorId: a.id, status: "published", html: "<p>x</p>", tags: [] });
