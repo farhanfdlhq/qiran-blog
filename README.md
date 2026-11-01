@@ -1,209 +1,40 @@
 # qiran.my.id
 
-Blog Qirana dan Qirani. Nama *qiran* diambil dari bagian tengah nama mereka.
+**[qiran.my.id](https://qiran.my.id)** adalah blog tulisan Qirana dan Qirani, saudara kembar yang sedang belajar menulis.
 
-Repo ini berisi semua yang dibutuhkan untuk menjalankan blognya di VPS aaPanel:
+Nama *qiran* diambil dari bagian tengah nama mereka: Qir**an**a dan Qir**an**i. Isinya opini, refleksi, cerita pendek, puisi, catatan pelajaran, dan review buku atau film. Tidak semua tulisan akan sempurna, karena blog ini memang tempat latihan.
 
-- **Ghost 6 + MySQL 8** lewat Docker Compose. Ghost adalah platform blog dengan panel menulis di `/ghost`.
-- **Tema `qiran`** yang dibuat khusus: tipografi besar, satu huruf (Sentient), warna hijau-hitam dan putih tulang, mode terang/gelap, dan tombol saring per penulis.
-- **Skrip** untuk update, backup, dan restore.
+![Beranda qiran.my.id](docs/beranda.jpg)
 
-```
-.
-├── docker-compose.yml      Ghost + MySQL
-├── .env.example            contoh pengaturan (salin jadi .env)
-├── nginx/ghost-proxy.conf  blok reverse proxy untuk aaPanel
-├── scripts/
-│   ├── update.sh           backup → git pull → update image → restart
-│   ├── backup.sh           dump database + arsip konten
-│   └── restore.sh          pulihkan dari backup
-├── theme/qiran/            tema Ghost
-└── PANDUAN-MENULIS.md      panduan untuk penulis (Qirana & Qirani)
-```
+## Isi blog
 
-Data blog (database, gambar yang diunggah) tersimpan di folder `data/` dan tidak ikut masuk git.
+| Topik | Isinya |
+| --- | --- |
+| Opini | Pendapat tentang sekolah, kebiasaan, dan hal sehari-hari |
+| Refleksi | Catatan tentang pengalaman dan apa yang dipelajari darinya |
+| Cerita | Cerita pendek |
+| Puisi | Puisi pendek |
+| Belajar | Pelajaran sekolah yang dijelaskan ulang dengan cara sendiri |
+| Review | Pendapat jujur tentang buku, film, dan lagu |
 
----
+## Tampilan
 
-## Pasang di VPS (sekali saja)
+Desainnya sengaja sederhana dan fokus ke tulisan: huruf besar, satu jenis huruf (Sentient), warna putih tulang dan hijau-hitam, dengan aksen hijau giok. Ada mode terang dan gelap, daftar tulisan yang bisa disaring per penulis, dan nama *qiran* yang tampil besar di bagian bawah setiap halaman.
 
-Langkah ini mengasumsikan aaPanel dengan Nginx dan Docker sudah terpasang (menu **Docker** di aaPanel).
+![Halaman artikel](docs/artikel.jpg)
 
-### 1. Arahkan domain ke VPS lewat Cloudflare
+## Dibangun dengan
 
-1. Di Cloudflare: **Domains → Onboard a domain**, isi `qiran.my.id`, pilih paket **Free**. Cloudflare memberi dua nameserver (misalnya `xxx.ns.cloudflare.com`).
-2. Di registrar (indo.domains): **Domain Saya → qiran.my.id → Kelola → Nameserver**, ganti nameserver bawaan dengan dua nameserver dari Cloudflare.
-3. Di Cloudflare: **DNS → Records**, buat:
+- [Ghost](https://ghost.org) sebagai platform blog dan panel menulis
+- Tema `qiran` yang dibuat khusus untuk blog ini
+- Docker di VPS dengan aaPanel, Cloudflare untuk DNS dan SSL
 
-   | Tipe | Nama | Nilai | Proxy |
-   | --- | --- | --- | --- |
-   | A | `@` | IP publik VPS | **DNS only** (awan abu-abu) dulu |
-   | CNAME | `www` | `qiran.my.id` | **DNS only** dulu |
+## Dokumen lain
 
-   Biarkan abu-abu sampai sertifikat SSL di aaPanel berhasil dibuat (langkah 5), baru ubah jadi oranye.
+- [Panduan menulis](PANDUAN-MENULIS.md): untuk Qirana dan Qirani, cara menulis dan menerbitkan tulisan
+- [Pemasangan dan perawatan](docs/PEMASANGAN.md): cara menjalankan, update, dan backup blog di server
+- [Catatan desain](theme/qiran/DESIGN.md): keputusan desain tema dan alasannya
 
-Tunggu sampai Cloudflare menandai domain **Active** dan `ping qiran.my.id` menunjukkan IP VPS. Biasanya beberapa menit, kadang sampai beberapa jam.
+## Lisensi
 
-### 2. Clone repo dan isi `.env`
-
-Lewat terminal aaPanel atau SSH:
-
-```bash
-cd /opt && git clone https://github.com/farhanfdlhq/qiran-blog.git && cd qiran-blog
-```
-
-```bash
-cp .env.example .env && chmod 600 .env
-```
-
-Buat dua password acak untuk database:
-
-```bash
-echo "DATABASE_PASSWORD=$(openssl rand -hex 24)"; echo "DATABASE_ROOT_PASSWORD=$(openssl rand -hex 24)"
-```
-
-Buka `.env` (`nano .env`), tempel kedua password tadi, lalu isi bagian email (lihat langkah 3).
-
-### 3. Siapkan email (wajib)
-
-Ghost butuh email untuk reset password, undangan penulis, dan **kode verifikasi saat login dari perangkat baru**. Tanpa email, penulis tidak bisa login dari HP atau laptop baru.
-
-Cara paling mudah dengan Gmail:
-
-1. Pakai akun Google yang sudah mengaktifkan verifikasi 2 langkah.
-2. Buka <https://myaccount.google.com/apppasswords>, buat App Password bernama "Ghost".
-3. Isi di `.env`:
-   ```
-   MAIL_FROM="Blog Qiran <akun@gmail.com>"
-   SMTP_USER=akun@gmail.com
-   SMTP_PASSWORD=<16 huruf app password, tanpa spasi>
-   ```
-
-Gmail cukup untuk email akun (login, undangan, reset). Kalau nanti mau mengirim newsletter ke banyak pembaca, Ghost butuh Mailgun. Itu terpisah dan tidak wajib.
-
-### 4. Jalankan Ghost
-
-```bash
-docker compose up -d
-```
-
-Cek statusnya. Tunggu sampai `qiran-db` tertulis `healthy` dan `qiran-ghost` berjalan:
-
-```bash
-docker compose ps
-```
-
-Ghost sekarang berjalan di `127.0.0.1:2368`. Port ini hanya bisa diakses dari VPS sendiri, tidak terbuka ke internet.
-
-### 5. Buat website di aaPanel
-
-Ghost dijalankan lewat Docker, jadi **jangan** dibuat sebagai *Node.js Project*. Pakai **Proxy Project**:
-
-1. **Website → Proxy Project → Add**. Domain: `qiran.my.id` dan `www.qiran.my.id`. Target / proxy URL: `http://127.0.0.1:2368`. Send domain / host: `$host`.
-2. **SSL** (pilih salah satu):
-   - **Cloudflare Origin Certificate** (yang dipakai sekarang): Cloudflare → SSL/TLS → Origin Server → Create Certificate (RSA, 15 tahun). Tempel *Private Key* dan *Origin Certificate* di aaPanel → site → **SSL → Current certificate** → Save, lalu nyalakan **Force HTTPS**. Awan Cloudflare wajib oranye.
-   - **Let's Encrypt**: site → **SSL → Let's Encrypt**, centang kedua domain, Apply. Awan Cloudflare harus abu-abu saat membuat sertifikat.
-3. **Batas upload.** Site → **Config file → Customized Configuration Files**, blok **server**, tambahkan lalu Save:
-   ```
-   client_max_body_size 50m;
-   ```
-4. **Header https (wajib).** Di aaPanel 8, config utama Proxy Project terkunci dan blok `location` tidak bisa diubah dari panel. Tambahkan lewat terminal:
-   ```bash
-   F=/www/server/panel/vhost/nginx/qiran.my.id.conf; cp $F $F.bak; grep -q "X-Forwarded-Proto" $F || sed -i 's#^\(\s*\)proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;#&\n\1proxy_set_header X-Forwarded-Proto $scheme;#' $F; nginx -t && nginx -s reload && grep -n "Forwarded" $F
-   ```
-   Tanpa header ini login admin Ghost bisa gagal (terlempar balik ke halaman login). Jalankan ulang perintah ini setiap kali pengaturan **URL Proxy** diubah dari aaPanel, karena aaPanel bisa menulis ulang file tersebut. Perintahnya aman diulang.
-
-Buka <https://qiran.my.id>. Kalau halaman Ghost muncul, server sudah siap.
-
-**Lalu nyalakan proxy Cloudflare:**
-
-1. Cloudflare → **DNS → Records**: ubah kedua record jadi **Proxied** (awan oranye).
-2. Cloudflare → **SSL/TLS → Overview**: pilih **Full (strict)**. Jangan pakai *Flexible*, karena Ghost akan terus mengalihkan ke https dan halaman tidak pernah terbuka.
-3. Cloudflare → **Speed → Optimization**: pastikan **Rocket Loader** mati. Rocket Loader bisa merusak panel admin Ghost.
-
-Dengan Origin Certificate tidak ada yang perlu diperpanjang sampai 15 tahun lagi.
-
-### 6. Pengaturan pertama di Ghost
-
-Buka <https://qiran.my.id/ghost> dan buat akun **pemilik (Owner)**. Sebaiknya akun ini milik kakak, bukan adik, supaya pengaturan server dan backup tetap di tangan orang dewasa.
-
-Lalu, di panel Ghost:
-
-1. **Settings → Design & branding → Change theme**. Aktifkan **qiran**.
-2. **Settings → Design & branding → Brand → Accent color**: isi `#2f5d50`. Warna ini dipakai tombol komentar dan langganan bawaan Ghost.
-3. **Settings → General → Publication language**: isi `id`.
-4. **Settings → General → Title & description**: judul `qiran`, deskripsi singkat.
-5. **Settings → Navigation**: Primary berisi `Tulisan` → `/#tulisan` dan `Tentang` → `/tentang/`. Secondary (footer) bebas.
-6. **Settings → Staff → Invite people**: undang Qirana dan Qirani dengan peran **Author**. Author bisa menulis dan menerbitkan tulisannya sendiri, tapi tidak bisa mengubah pengaturan situs atau tulisan orang lain.
-7. Hapus tulisan contoh bawaan Ghost ("Coming soon") di menu **Posts**.
-8. Buat halaman (**Pages → New page**) berjudul **Tentang** dengan URL `tentang`. Isinya otomatis tampil juga di bagian bawah beranda.
-
-Teks besar di beranda bisa diubah di **Settings → Design & branding → Customize → Homepage**.
-
-### Email masuk untuk @qiran.my.id (opsional)
-
-Akun Owner Ghost memakai `qiran@qiran.my.id`, yang ditampung oleh Mail Server aaPanel di VPS yang sama. Ghost tetap **mengirim** email lewat Gmail (SMTP di `.env`).
-
-1. Cloudflare DNS: `A mail → IP VPS` dengan **DNS only** (awan abu-abu).
-2. aaPanel **Mail Server → Mail Domain → Add Domain**, pilih **Manual**, A record `mail.qiran.my.id`.
-3. Klik **DNS Record** di baris domain, lalu salin MX, SPF, DKIM, dan DMARC ke Cloudflare. DKIM wajib lewat tombol **Copy**.
-4. **Mailboxes → Add** `qiran@qiran.my.id`. Email masuk bisa dibaca di **Mail Server → Email → Inbox**.
-
-### 7. Backup otomatis
-
-Di aaPanel: **Cron → Add task**, tipe *Shell Script*, jadwal harian jam 03:00:
-
-```bash
-cd /opt/qiran-blog && BACKUP_DIR=/www/backup/qiran ./scripts/backup.sh
-```
-
-Backup lebih dari 14 hari dihapus otomatis. Sesekali salin satu folder backup ke tempat lain (Google Drive, laptop), karena backup di VPS yang sama ikut hilang kalau VPS-nya bermasalah.
-
----
-
-## Perawatan
-
-**Update tema atau Ghost** (setelah ada perubahan di repo ini, atau sebulan sekali untuk update keamanan Ghost):
-
-```bash
-cd /opt/qiran-blog && ./scripts/update.sh
-```
-
-Skrip ini membuat backup dulu, menarik perubahan dari GitHub, mengambil image Ghost terbaru dalam versi 6, lalu me-restart Ghost. Restart diperlukan karena Ghost menyimpan template tema di cache.
-
-**Pulihkan dari backup:**
-
-```bash
-cd /opt/qiran-blog && ./scripts/restore.sh /www/backup/qiran/qiran-20261101-030000
-```
-
-**Lihat log kalau ada masalah:**
-
-```bash
-cd /opt/qiran-blog && docker compose logs --tail=100 ghost
-```
-
----
-
-## Privasi (penulisnya masih 16 tahun)
-
-Beberapa hal yang sebaiknya dibicarakan bersama sebelum blog dibuka:
-
-- **Nama.** Cukup nama depan. Jangan cantumkan nama lengkap, nama sekolah, alamat, atau jadwal harian.
-- **Foto.** Hindari foto wajah, seragam dengan logo sekolah, atau foto yang memperlihatkan lokasi rumah.
-- **Komentar.** Komentar Ghost hanya bisa ditulis oleh pembaca yang mendaftar (member). Kalau dinyalakan (**Settings → Membership → Commenting**), pertimbangkan **Paid members only** atau matikan sama sekali di awal. Penulis bisa menyembunyikan komentar dari panel.
-- **Pendaftaran pembaca.** Kalau tidak ingin ada yang mendaftar, set **Settings → Membership → Subscription access** ke *Nobody*. Tombol "Ikuti" di header otomatis hilang.
-
----
-
-## Mengubah tema
-
-Semua file tema ada di `theme/qiran/`. Folder ini langsung dipasang ke Ghost, jadi setelah `git pull` cukup jalankan `docker compose restart ghost`.
-
-Cek tema sebelum push:
-
-```bash
-npx gscan theme/qiran
-```
-
-Keputusan desain dan alasannya ada di [`theme/qiran/DESIGN.md`](theme/qiran/DESIGN.md).
+Kode dan tema berlisensi [MIT](LICENSE). Tulisan di blog adalah milik penulisnya masing-masing.
