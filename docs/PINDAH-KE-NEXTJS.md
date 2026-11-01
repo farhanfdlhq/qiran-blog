@@ -157,7 +157,7 @@ Isinya salinan database dan semua gambar. Backup lebih dari 14 hari dihapus otom
 ## 10. Update aplikasi nanti
 
 ```bash
-export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog && git pull && cd web && npm ci && npm run build
+export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog && git pull && cd web && npm ci && npm run build && chown -R www:www .next /opt/qiran-blog/data/web
 ```
 
 Lalu klik **Restart** pada project `qiran` di aaPanel Node.js Project.

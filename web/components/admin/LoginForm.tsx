@@ -1,6 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { login, type FormState } from "@/app/actions/admin";
+import { PasswordInput } from "./PasswordInput";
 
 export function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(login, {});
@@ -13,7 +14,7 @@ export function LoginForm({ next }: { next: string }) {
       </div>
       <div className="field">
         <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" />
+        <PasswordInput id="password" name="password" required autoComplete="current-password" />
       </div>
       {state.message ? <p className="form-msg err" role="alert">{state.message}</p> : null}
       <div><button className="btn" type="submit" disabled={pending}>{pending ? "Memeriksa…" : "Masuk"}</button></div>

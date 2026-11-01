@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { saveProfile, changePassword } from "@/app/actions/admin";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { AvatarField } from "@/components/admin/AvatarField";
+import { PasswordInput } from "@/components/admin/PasswordInput";
 
 export default async function AccountPage() {
   const user = await requireUser();
@@ -34,16 +35,16 @@ export default async function AccountPage() {
         <ActionForm action={changePassword} resetOnOk>
           <div className="field">
             <label htmlFor="current">Password sekarang</label>
-            <input id="current" name="current" type="password" required autoComplete="current-password" />
+            <PasswordInput id="current" name="current" required autoComplete="current-password" />
           </div>
           <div className="form-row">
             <div className="field">
               <label htmlFor="next">Password baru</label>
-              <input id="next" name="next" type="password" required minLength={10} autoComplete="new-password" aria-describedby="pw-hint" />
+              <PasswordInput id="next" name="next" required minLength={10} autoComplete="new-password" aria-describedby="pw-hint" />
             </div>
             <div className="field">
               <label htmlFor="confirm">Ulangi password baru</label>
-              <input id="confirm" name="confirm" type="password" required minLength={10} autoComplete="new-password" />
+              <PasswordInput id="confirm" name="confirm" required minLength={10} autoComplete="new-password" />
             </div>
           </div>
           <p className="hint" id="pw-hint">Minimal 10 karakter. Perangkat lain akan otomatis keluar.</p>
