@@ -124,7 +124,11 @@ restart_app() {
     echo "==> Restart lewat skrip aaPanel ($AAPANEL_SCRIPT), user: ${run_user:-root}"
     stop_app || return 2
     if [ -n "$run_user" ] && [ "$run_user" != "root" ] && ! grep -qE '(^|[^a-z])(su|sudo|runuser)[[:space:]]' "$AAPANEL_SCRIPT" && command -v runuser >/dev/null 2>&1; then
-      runuser -u "$run_user" -- bash "$AAPANEL_SCRIPT" >/dev/null 2>&1 &
+      # npm butuh HOME yang bisa ditulis user tersebut (bukan /root)
+      local run_home
+      run_home="$(getent passwd "$run_user" | cut -d: -f6)"
+      if [ -z "$run_home" ] || [ ! -w "$run_home" ] 2>/dev/null; then run_home="/tmp/${run_user}-home"; mkdir -p "$run_home"; chown "$run_user" "$run_home"; fi
+      runuser -u "$run_user" -- env HOME="$run_home" bash "$AAPANEL_SCRIPT" >/dev/null 2>&1 &
     else
       bash "$AAPANEL_SCRIPT" >/dev/null 2>&1 &
     fi
