@@ -29,16 +29,20 @@ Data blog (database, gambar yang diunggah) tersimpan di folder `data/` dan tidak
 
 Langkah ini mengasumsikan aaPanel dengan Nginx dan Docker sudah terpasang (menu **Docker** di aaPanel).
 
-### 1. Arahkan domain ke VPS
+### 1. Arahkan domain ke VPS lewat Cloudflare
 
-Di dashboard registrar domain, buka pengaturan DNS `qiran.my.id` lalu buat record:
+1. Di Cloudflare: **Domains → Onboard a domain**, isi `qiran.my.id`, pilih paket **Free**. Cloudflare memberi dua nameserver (misalnya `xxx.ns.cloudflare.com`).
+2. Di registrar (indo.domains): **Domain Saya → qiran.my.id → Kelola → Nameserver**, ganti nameserver bawaan dengan dua nameserver dari Cloudflare.
+3. Di Cloudflare: **DNS → Records**, buat:
 
-| Tipe | Nama | Nilai |
-| --- | --- | --- |
-| A | `@` | IP publik VPS |
-| A | `www` | IP publik VPS |
+   | Tipe | Nama | Nilai | Proxy |
+   | --- | --- | --- | --- |
+   | A | `@` | IP publik VPS | **DNS only** (awan abu-abu) dulu |
+   | CNAME | `www` | `qiran.my.id` | **DNS only** dulu |
 
-Tunggu sampai `ping qiran.my.id` menunjukkan IP VPS (biasanya beberapa menit, kadang sampai beberapa jam).
+   Biarkan abu-abu sampai sertifikat SSL di aaPanel berhasil dibuat (langkah 5), baru ubah jadi oranye.
+
+Tunggu sampai Cloudflare menandai domain **Active** dan `ping qiran.my.id` menunjukkan IP VPS. Biasanya beberapa menit, kadang sampai beberapa jam.
 
 ### 2. Clone repo dan isi `.env`
 
@@ -93,13 +97,25 @@ Ghost sekarang berjalan di `127.0.0.1:2368`. Port ini hanya bisa diakses dari VP
 
 ### 5. Buat website di aaPanel
 
-1. **Website → Add site**. Domain: `qiran.my.id` dan `www.qiran.my.id`. PHP: *Static* (tidak perlu PHP). Database: tidak usah.
-2. Buka pengaturan site → **SSL → Let's Encrypt**, centang kedua domain, Apply. Aktifkan **Force HTTPS**.
-3. Buka **Conf** (file konfigurasi Nginx site ini). Tempel isi `nginx/ghost-proxy.conf` di dalam blok `server { ... }` untuk port 443, menggantikan blok `location /` yang sudah ada kalau ada. Simpan.
+Ghost dijalankan lewat Docker, jadi **jangan** dibuat sebagai *Node.js Project*. Pakai **Proxy Project**:
 
-   Bisa juga lewat menu **Reverse proxy** aaPanel (target `http://127.0.0.1:2368`), tapi pastikan header `X-Forwarded-Proto $scheme` ikut dikirim. Tanpa header itu browser akan menampilkan *too many redirects*.
+1. **Website → Proxy Project → Add**. Domain: `qiran.my.id` dan `www.qiran.my.id`. Target / proxy URL: `http://127.0.0.1:2368`. Send domain / host: `$host`.
+2. Buka pengaturan site → **SSL → Let's Encrypt**, centang kedua domain, Apply. Aktifkan **Force HTTPS**.
+3. Buka **Config** (file konfigurasi Nginx site ini) dan pastikan blok `location /` berisi baris berikut. Kalau belum ada, tambahkan (contoh lengkap di `nginx/ghost-proxy.conf`):
+   ```
+   proxy_set_header X-Forwarded-Proto $scheme;
+   ```
+   Tanpa baris itu browser akan menampilkan *too many redirects*. Tambahkan juga `client_max_body_size 50m;` di dalam blok `server` supaya upload gambar besar tidak ditolak.
 
 Buka <https://qiran.my.id>. Kalau halaman Ghost muncul, server sudah siap.
+
+**Lalu nyalakan proxy Cloudflare:**
+
+1. Cloudflare → **DNS → Records**: ubah kedua record jadi **Proxied** (awan oranye).
+2. Cloudflare → **SSL/TLS → Overview**: pilih **Full (strict)**. Jangan pakai *Flexible*, karena Ghost akan terus mengalihkan ke https dan halaman tidak pernah terbuka.
+3. Cloudflare → **Speed → Optimization**: pastikan **Rocket Loader** mati. Rocket Loader bisa merusak panel admin Ghost.
+
+Perpanjangan otomatis sertifikat Let's Encrypt di aaPanel tetap jalan saat proxy Cloudflare aktif.
 
 ### 6. Pengaturan pertama di Ghost
 
