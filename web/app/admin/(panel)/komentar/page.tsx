@@ -38,7 +38,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
           ))}
         </ul>
       ) : (
-        <p className="empty">{status === "pending" ? "Tidak ada komentar yang menunggu." : "Kosong."}</p>
+        <p className="empty">{status === "pending" ? "Tidak ada komentar yang menunggu." : status === "spam" ? "Tidak ada komentar spam." : "Belum ada komentar yang disetujui."}</p>
       )}
     </>
   );

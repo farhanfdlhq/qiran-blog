@@ -278,13 +278,14 @@ export function PostEditor({ initial }: { initial: Initial }) {
   return (
     <div className="editor-shell">
       <div className="editor-bar">
-        <a className="textlink" href="/admin/">&larr; Kembali</a>
+        <a className="textlink editor-back" href="/admin/" aria-label="Kembali ke daftar tulisan">&larr;<span className="editor-back-label"> Kembali</span></a>
         <span className={`status${status === "published" ? (scheduled ? " status-scheduled" : " status-published") : ""}`}>{statusLabel}</span>
         <span className={`save-state${saveFailed ? " is-error" : ""}`} role="status" aria-live="polite">{saveState}</span>
         {saveFailed ? <button type="button" className="textbtn" onClick={() => save("save").then((ok) => ok && toast("Tersimpan."))}>Coba lagi</button> : null}
         <span className="spacer" />
         <a className="btn btn-quiet btn-small" href={`/${shownSlug}/`} target="_blank" rel="noopener"
           onClick={(e) => { if (dirty) { e.preventDefault(); const w = window.open("about:blank", "_blank"); save("save").then((ok) => { if (w) { if (ok) w.location.href = `/${shownSlug}/`; else w.close(); } }); } }}>Pratinjau</a>
+        <div className="editor-actions">
         {status === "draft" ? (
           <>
             <button className="btn btn-quiet btn-small" type="button" disabled={saving} onClick={() => save("save").then((ok) => ok && toast("Draf tersimpan."))}>Simpan draf</button>
@@ -296,6 +297,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
             <button className="btn btn-small" type="button" disabled={saving} onClick={() => save("publish")}>Perbarui</button>
           </>
         )}
+        </div>
       </div>
 
       <div className="editor-wrap">

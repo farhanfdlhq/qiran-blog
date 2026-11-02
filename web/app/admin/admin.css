@@ -127,12 +127,12 @@
     .admin-side, .admin-main { min-width: 0; }
     .admin-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 14px 16px; gap: 8px; }
     .admin-brand { margin: 0 12px 0 0; }
-    .admin-nav { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; width: 100%; min-width: 0; order: 3; scrollbar-width: none; }
+    .admin-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; width: 100%; min-width: 0; order: 3; }
     .admin-nav a { white-space: nowrap; font-size: var(--step-small); padding: 7px 10px; }
     .admin-side-foot { margin-left: auto; }
     .admin-side-foot { margin: 0; padding: 0; display: flex; gap: 12px; align-items: center; }
-    .editor-wrap { grid-template-columns: 1fr; }
-    .toolbar { top: 58px; }
+    .editor-wrap { grid-template-columns: minmax(0, 1fr); }
+    .toolbar { top: 61px; }
     .form-row { grid-template-columns: 1fr; }
 }
 
@@ -152,7 +152,13 @@
 .tool:disabled:hover { background: none; }
 .editor-count { margin-top: 28px; }
 @media (max-width: 960px) {
-    .toolbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .toolbar {
+        flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+        /* ujung kanan memudar: tanda toolbar bisa digeser */
+        mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
     .tool { flex-shrink: 0; }
     .tool-sep { flex-shrink: 0; }
 }
@@ -222,3 +228,23 @@
     .list-item-select .list-side { grid-column: 2; grid-row: auto; flex-wrap: wrap; }
     .bulk-bar { bottom: 12px; }
 }
+
+/* ---------- Editor di HP: bilah atas satu baris, tombol terbit di bawah ---------- */
+.editor-actions { display: contents; }
+@media (max-width: 600px) {
+    .editor-bar { flex-wrap: nowrap; min-height: 61px; gap: 8px; padding: 12px 16px; }
+    .editor-back { font-size: 22px; line-height: 1; text-decoration: none; padding: 4px 6px 4px 0; }
+    .editor-back-label { display: none; }
+    .editor-bar .save-state { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .editor-actions {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; gap: 10px;
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--bg);
+        border-top: 1px solid var(--surface); box-shadow: 0 -8px 24px rgb(0 0 0 / 8%);
+    }
+    .editor-actions .btn { flex: 1; min-height: 44px; }
+    .editor-side { padding-bottom: 120px; }
+    .editor-doc { padding: 24px 16px 48px; }
+    .editor-title { font-size: clamp(1.75rem, 7vw, 2.25rem); }
+    .admin-head .btn { min-height: 44px; }
+}
+.list-title, .comment-body, .list-meta { overflow-wrap: anywhere; }

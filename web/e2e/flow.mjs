@@ -79,7 +79,7 @@ try {
   await page.click(".prose");
   await page.keyboard.press("End");
   await page.keyboard.type(" tambahan");
-  await page.click("text=← Kembali");
+  await page.click("a.editor-back");
   const leave = page.locator(".dialog.confirm[open]");
   check("dialog 'belum tersimpan' muncul", await leave.isVisible({ timeout: 3000 }).catch(() => false));
   await leave.locator("text=Simpan lalu pindah").click();
@@ -212,6 +212,18 @@ try {
   check("upload ditolak dari situs lain", up2.status() === 403);
   const up3 = await adm.request.post(BASE + "/api/upload/", { multipart: { file: { name: "a.php", mimeType: "image/png", buffer: Buffer.from("<?php echo 1;") } } });
   check("file bukan gambar ditolak", up3.status() === 422);
+
+  // 11c. Tampilan HP: tidak ada halaman admin yang melebihi lebar layar
+  await page.setViewportSize({ width: 375, height: 740 });
+  const wide = [];
+  for (const url of ["/admin/", editUrl, "/admin/komentar/", "/admin/statistik/", "/admin/akun/", "/admin/tentang/"]) {
+    await page.goto(url.startsWith("http") ? url : BASE + url);
+    await page.waitForTimeout(400);
+    const w = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (w > 375) wide.push(`${url} ${w}px`);
+  }
+  check("panel admin muat di layar HP", wide.length === 0, wide.join(", "));
+  await page.setViewportSize({ width: 1280, height: 800 });
 
   // 11b. Hapus tulisan uji lewat dialog konfirmasi
   await page.goto(editUrl);
