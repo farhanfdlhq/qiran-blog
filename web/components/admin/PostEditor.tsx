@@ -353,7 +353,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
               <input id="publishAt" type="datetime-local" value={publishAt} onChange={(e) => touch(setPublishAt)(e.target.value)} aria-describedby="publish-hint" />
               <p className="hint" id="publish-hint">
                 Kosongkan untuk terbit sekarang. Isi waktu yang akan datang untuk menjadwalkan.{" "}
-                {publishAt ? <button type="button" className="textbtn" onClick={() => touch(setPublishAt)("")}>Kosongkan</button> : null}
+                {publishAt ? <button type="button" className="textbtn" onClick={() => touch(setPublishAt)("")}>Hapus tanggal</button> : null}
               </p>
             </div>
           ) : null}

@@ -122,15 +122,17 @@
 .editor-side h3 { margin: 0; font-size: var(--step-body); font-weight: 500; }
 .hint { margin: 0; color: var(--muted); font-size: var(--step-small); }
 
-@media (max-width: 960px) {
+/* Di bawah 1200px menu samping jadi menu atas, supaya area tulis di editor tetap lega */
+@media (max-width: 1199px) {
     .admin { grid-template-columns: minmax(0, 1fr); }
     .admin-side, .admin-main { min-width: 0; }
-    .admin-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 14px 16px; gap: 8px; }
+    .admin-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 14px clamp(16px, 3vw, 40px); gap: 8px; }
     .admin-brand { margin: 0 12px 0 0; }
     .admin-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; width: 100%; min-width: 0; order: 3; }
     .admin-nav a { white-space: nowrap; font-size: var(--step-small); padding: 7px 10px; }
-    .admin-side-foot { margin-left: auto; }
     .admin-side-foot { margin: 0; padding: 0; display: flex; gap: 12px; align-items: center; }
+}
+@media (max-width: 960px) {
     .editor-wrap { grid-template-columns: minmax(0, 1fr); }
     .toolbar { top: 61px; }
     .form-row { grid-template-columns: 1fr; }
