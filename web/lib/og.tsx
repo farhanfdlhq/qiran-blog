@@ -61,10 +61,10 @@ const g = globalThis as unknown as { __qiranOgFonts?: Promise<{ name: string; da
 /** Sentient (font situs) diunduh sekali dari Fontshare lalu disimpan di DATA_DIR/cache/fonts. */
 async function loadFonts() {
   g.__qiranOgFonts ??= (async () => {
-    const dir = path.join(dataDir(), "cache", "fonts");
+    const dir = path.join(/*turbopackIgnore: true*/ dataDir(), "cache", "fonts");
     fs.mkdirSync(dir, { recursive: true });
     const weights = [400, 500] as const;
-    const files = weights.map((w) => path.join(dir, `sentient-${w}.ttf`));
+    const files = weights.map((w) => path.join(/*turbopackIgnore: true*/ dir, `sentient-${w}.ttf`));
     if (!files.every((f) => fs.existsSync(f))) {
       const css = await (await fetch("https://api.fontshare.com/v2/css?f[]=sentient@400,500", { signal: AbortSignal.timeout(10_000) })).text();
       for (const [i, w] of weights.entries()) {
@@ -76,7 +76,7 @@ async function loadFonts() {
         fs.writeFileSync(files[i], Buffer.from(await res.arrayBuffer()));
       }
     }
-    return weights.map((w, i) => ({ name: "Sentient", data: fs.readFileSync(files[i]), weight: w }));
+    return weights.map((w, i) => ({ name: "Sentient", data: fs.readFileSync(/*turbopackIgnore: true*/ files[i]), weight: w }));
   })().catch((err) => {
     g.__qiranOgFonts = undefined; // coba lagi di permintaan berikutnya
     throw err;
@@ -126,10 +126,10 @@ async function renderCard(post: OgPost, siteTitle: string): Promise<Buffer> {
 
 /** Ambil dari cache, atau render lalu simpan. Versi lama untuk slug yang sama dihapus. */
 export async function ogImageFor(post: OgPost, siteTitle: string): Promise<Buffer> {
-  const dir = path.join(dataDir(), "cache", "og");
+  const dir = path.join(/*turbopackIgnore: true*/ dataDir(), "cache", "og");
   fs.mkdirSync(dir, { recursive: true });
   const version = ogVersion(post, siteTitle);
-  const file = path.join(dir, `${post.slug}-${version}.jpg`);
+  const file = path.join(/*turbopackIgnore: true*/ dir, `${post.slug}-${version}.jpg`);
   if (fs.existsSync(file)) return fs.promises.readFile(file);
 
   const jpg = await renderCard(post, siteTitle);
