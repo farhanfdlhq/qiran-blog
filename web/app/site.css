@@ -590,8 +590,33 @@ input[type="checkbox"]:checked::after { transform: rotate(-45deg) scale(1); }
 input[type="checkbox"]:indeterminate { background: var(--ink); border-color: var(--ink); }
 input[type="checkbox"]:indeterminate::after { width: 10px; height: 0; margin-top: 0; border-left: 0; border-bottom: 2px solid var(--bg); transform: none; }
 input[type="checkbox"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-input[type="datetime-local"] { color-scheme: light; }
-:root[data-mode="dark"] input[type="datetime-local"] { color-scheme: dark; }
+
+/* Isian otomatis browser (autofill): tetap warna situs, bukan biru bawaan Chrome */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus,
+textarea:-webkit-autofill, select:-webkit-autofill {
+    -webkit-text-fill-color: var(--ink);
+    caret-color: var(--ink);
+    box-shadow: 0 0 0 1000px var(--surface) inset !important;
+    transition: background-color 9999s ease-out 0s;
+}
+.editor-side input:-webkit-autofill, .tag-combo input:-webkit-autofill { box-shadow: 0 0 0 1000px var(--bg) inset !important; }
+input, textarea { caret-color: var(--ink); }
+input::placeholder, textarea::placeholder { color: color-mix(in srgb, var(--muted) 80%, transparent); opacity: 1; }
+
+/* Kolom pencarian tanpa tombol silang bawaan */
+input[type="search"]::-webkit-search-cancel-button, input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+
+/* Scrollbar dengan warna situs (halaman, kolom teks, daftar) */
+html { scrollbar-color: color-mix(in srgb, var(--ink) 28%, transparent) transparent; }
+* { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 28%, transparent) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--ink) 24%, transparent); border-radius: 999px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--ink) 42%, transparent); border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+/* Pegangan ubah ukuran kolom teks */
+textarea::-webkit-resizer { background: linear-gradient(135deg, transparent 50%, color-mix(in srgb, var(--ink) 30%, transparent) 50%, color-mix(in srgb, var(--ink) 30%, transparent) 60%, transparent 60%, transparent 70%, color-mix(in srgb, var(--ink) 30%, transparent) 70%, color-mix(in srgb, var(--ink) 30%, transparent) 80%, transparent 80%); border-radius: 0 0 6px 0; }
 
 .logo-mark { flex-shrink: 0; border-radius: 22%; }
 .wordmark .logo-mark { width: 1.05em; height: 1.05em; transform: translateY(.06em); }

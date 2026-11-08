@@ -21,7 +21,7 @@ type Seed = { tags: Record<string, string>; posts: SeedPost[]; about: string };
 type Article = {
   title: string; slug: string; authorSlug?: string; status?: "draft" | "published"; publishedAt?: string; tags: string[];
   excerpt: string; html: string; image?: string; imageAlt?: string; imageCaption?: string;
-  pdfLabel?: string; pdfSubtitle?: string; pdfCover?: boolean; references?: string;
+  pdfLabel?: string; pdfSubtitle?: string; pdfCover?: boolean; references?: string; sources?: unknown[];
 };
 
 function arg(name: string) {
@@ -66,8 +66,14 @@ async function main() {
     const file = path.join(dir, entry.name, "artikel.json");
     if (!entry.isDirectory() || !fs.existsSync(file)) continue;
     const a = JSON.parse(fs.readFileSync(file, "utf8")) as Article;
-    if (getAnyBySlug(a.slug)) {
-      console.log(`  lewati (sudah ada): ${a.slug}`);
+    const found = getAnyBySlug(a.slug);
+    if (found) {
+      // Daftar Pustaka yang belum pernah disunting dengan pengelola sumber diubah ke bentuk terstruktur
+      if (a.sources && !found.references_json) {
+        savePost({ id: found.id, title: found.title, slug: found.slug, allowComments: found.allow_comments === 1, status: found.status, publishedAt: found.published_at, authorId: found.author_id ?? author.id,
+          tags: found.tags.map((t) => t.name), excerpt: found.excerpt, referencesJson: JSON.stringify(a.sources) });
+        console.log(`  pustaka diperbarui: ${a.slug}`);
+      } else console.log(`  lewati (sudah ada): ${a.slug}`);
       continue;
     }
     const folder = path.join(dir, entry.name);
@@ -82,7 +88,8 @@ async function main() {
       title: a.title, slug: a.slug, excerpt: a.excerpt, html,
       featureImage: image, featureImageAlt: a.imageAlt ?? a.title, featureImageCaption: a.imageCaption ?? "",
       status: a.status ?? "published", publishedAt: a.publishedAt ?? null, authorId: (owner ?? author).id, tags: a.tags,
-      pdfLabel: a.pdfLabel, pdfSubtitle: a.pdfSubtitle, pdfCover: a.pdfCover, referencesText: a.references,
+      pdfLabel: a.pdfLabel, pdfSubtitle: a.pdfSubtitle, pdfCover: a.pdfCover,
+      ...(a.sources ? { referencesJson: JSON.stringify(a.sources) } : { referencesText: a.references }),
     });
     console.log(`  artikel: ${a.slug} (${a.status === "draft" ? "draf" : "terbit"}, atas nama ${(owner ?? author).name})`);
     added++;

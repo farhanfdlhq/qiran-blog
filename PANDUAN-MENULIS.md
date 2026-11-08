@@ -69,25 +69,21 @@ Kalau panitia minta format lain (misalnya satu kolom atau spasi 2), bilang ke ka
 
 ## Daftar Pustaka
 
-Tulis di kolom **Daftar Pustaka** di kanan editor, satu sumber per baris. Urutan abjad diatur otomatis. Daftar ini tampil di akhir tulisan di situs, dan di lembar terpisah di PDF, dengan baris kedua dan seterusnya menjorok 1,27 cm.
+Mirip **Insert Citation → Add New Source** di Microsoft Word. Di kolom kanan editor, bagian **Daftar Pustaka**:
 
-Pakai gaya **APA edisi 7**, yang paling umum diterima sekolah dan lomba (kecuali panitia menyebut gaya lain). Apit judul dengan bintang supaya miring: `*Judul*`.
+1. Klik **+ Tambah sumber**.
+2. Pilih **Jenis sumber**: Berita daring, Halaman web, Buku, Artikel jurnal, Foto atau gambar, Video, atau Tulis sendiri.
+3. Isi kolom-kolomnya:
+   - **Penulis:** nama lengkap, satu orang per baris. Otomatis ditulis "Nugroho, A.".
+   - Kalau penulisnya lembaga (WHO, CDC, ANTARA Foto), centang **Penulis berupa lembaga atau organisasi**.
+4. Lihat kotak **Hasilnya di Daftar Pustaka**. Formatnya otomatis mengikuti **APA edisi 7**: urutan, tanda baca, huruf miring, dan nama bulan dalam bahasa Indonesia.
+5. Klik **Tambahkan**. Untuk mengubah atau menghapus, pakai tombol **Ubah** atau **Hapus** di bawah setiap sumber.
 
-| Jenis sumber | Contoh |
-| --- | --- |
-| Berita daring | `Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/...` |
-| Halaman lembaga | `World Health Organization. (2026, 15 September). *Mental health at work*. https://www.who.int/...` |
-| Halaman tanpa tanggal | `U.S. Food and Drug Administration. (t.t.). *Keep your air clear: How tobacco can harm your lungs*. Diakses 8 November 2026, dari https://www.fda.gov/...` |
-| Foto | `Nama Fotografer. (2021, 2 November). *Uji coba Biskita Trans Pakuan Kota Bogor* [Foto]. ANTARA Foto. https://...` |
-| Buku | `Hirata, A. (2005). *Laskar pelangi*. Bentang Pustaka.` |
+Urutan abjad diatur otomatis. Daftar ini tampil di akhir tulisan di situs, dan di lembar terpisah di PDF, dengan baris kedua dan seterusnya menjorok 1,27 cm.
 
-Aturan yang sering terlewat:
+Hal yang tetap perlu diperhatikan sendiri:
 
-- Nama belakang dulu, lalu inisial: `Nugroho, A.`
-- Nama bulan dalam bahasa Indonesia, karena tulisannya berbahasa Indonesia: `(2026, 23 Januari)`.
-- Tanpa tanggal ditulis `(t.t.)`, ditambah tanggal kamu membukanya: `Diakses 8 November 2026, dari …`.
-- Kalau penulis dan nama situsnya sama (misalnya WHO di situs WHO), nama situs tidak perlu ditulis lagi.
-- Judul berita dan halaman web dimiringkan. Nama media (RMOL, detikNews) tidak.
+- Halaman web tanpa tanggal: kosongkan Tahun, lalu isi **Tanggal diakses**, yaitu tanggal kamu membukanya.
 - Setiap sumber di Daftar Pustaka harus disebut di dalam tulisan, misalnya "(Nugroho, 2026)" atau "menurut WHO (2026)". Sebaliknya, setiap yang dikutip harus ada di daftar.
 - Buka lagi setiap tautan sebelum mengirim, untuk memastikan tidak salah salin.
 

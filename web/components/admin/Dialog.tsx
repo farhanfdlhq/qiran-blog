@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { validateForm } from "@/lib/validate";
 
-type Field = { name: string; label: string; type?: "text" | "url"; value?: string; placeholder?: string; hint?: string; required?: boolean };
+type Field = { name: string; label: string; type?: "text" | "url" | "email"; value?: string; placeholder?: string; hint?: string; required?: boolean };
 
 /** Kotak dialog kecil berisi formulir, pengganti window.prompt. Escape atau klik Batal untuk menutup. */
 export function FormDialog({ open, title, fields, submitLabel, extraAction, onSubmit, onClose }: {
@@ -15,15 +16,19 @@ export function FormDialog({ open, title, fields, submitLabel, extraAction, onSu
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Dialog dipasang langsung di <body>: tidak mewarisi gaya panel dan tidak membuat form bersarang
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
     if (open && !d.open) d.showModal();
     if (!open && d.open) d.close();
-  }, [open]);
+  }, [open, mounted]);
 
-  return (
+  if (!mounted) return null;
+  return createPortal(
     <dialog ref={ref} className="dialog" onClose={onClose} aria-labelledby="dialog-title">
       {open ? (
         <form
@@ -53,6 +58,7 @@ export function FormDialog({ open, title, fields, submitLabel, extraAction, onSu
           </div>
         </form>
       ) : null}
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

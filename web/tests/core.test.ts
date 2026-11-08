@@ -453,7 +453,7 @@ describe("PDF: templat", async () => {
     id: 1, type: "post", title: "Kemudi Nestapa", slug: "kemudi", excerpt: "", content_json: null,
     content_html: '<p>Isi pertama.</p><figure class="qiran-fig"><img src="https://luar.example/x.jpg" alt=""><figcaption><span class="fig-caption">Demo</span> <span class="fig-source">(Sumber: RMOL)</span></figcaption></figure>',
     plain_text: "Isi pertama.", feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null,
-    allow_comments: 1, author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Potret Sopir Angkot", references_text: "A. (2026). *Judul*. https://a.id", pdf_cover: 0,
+    allow_comments: 1, author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Potret Sopir Angkot", references_text: "A. (2026). *Judul*. https://a.id", pdf_cover: 0, references_json: "",
     created_at: "2026-11-08T00:00:00.000Z", updated_at: "2026-11-08T00:00:00.000Z", tags: [], author: null, ...over,
   } as P);
   const id = { full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Provinsi Jawa Barat" };
@@ -504,7 +504,7 @@ describe("PDF: Daftar Pustaka di lembar sendiri", async () => {
   it("pustaka berada di luar kolom isi dan dimulai di halaman baru", () => {
     const post = { id: 1, type: "post", title: "T", slug: "t", excerpt: "", content_json: null, content_html: "<p>Isi.</p>", plain_text: "Isi.",
       feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null, allow_comments: 1, author_id: 1,
-      pdf_label: "", pdf_subtitle: "", references_text: "Satu sumber.", pdf_cover: 0, created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
+      pdf_label: "", pdf_subtitle: "", references_text: "Satu sumber.", pdf_cover: 0, references_json: "", created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
     const html = pdfHtml(post, { full_name: "Q", school: "", region: "" }, "Q", { uploadsDir: "/x" });
     const cols = html.slice(html.indexOf('<div class="cols">'), html.indexOf("</div>", html.indexOf('<div class="cols">')));
     expect(cols).not.toContain("Daftar Pustaka");
@@ -526,7 +526,7 @@ describe("PDF: halaman sampul", async () => {
     fs.writeFileSync(path.join(up, "s.jpg"), Buffer.from([0xff, 0xd8, 0xff, 0xd9]));
     const post = { id: 1, type: "post", title: "Kemudi <b>", slug: "k", excerpt: "", content_json: null, content_html: "<p>x</p>", plain_text: "x",
       feature_image: "/uploads/2026/s.jpg", feature_image_alt: "", feature_image_caption: "Foto: Q", status: "draft", published_at: null, allow_comments: 1,
-      author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Sub", references_text: "", pdf_cover: 1, created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfCoverHtml>[0];
+      author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Sub", references_text: "", pdf_cover: 1, references_json: "", created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfCoverHtml>[0];
     const id = { full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Jawa Barat" };
     const html = pdfCoverHtml(post, id, "Qirani", { uploadsDir: path.join(dir, "uploads") })!;
     expect(html).toContain("Kemudi &lt;b&gt;");
@@ -535,5 +535,71 @@ describe("PDF: halaman sampul", async () => {
     expect(html).toContain("data:image/jpeg;base64,");
     expect(pdfCoverHtml({ ...post, pdf_cover: 0 }, id, "Q", { uploadsDir: path.join(dir, "uploads") })).toBeNull();
     expect(pdfCoverHtml({ ...post, feature_image: "https://luar/x.jpg" }, id, "Q", { uploadsDir: path.join(dir, "uploads") })).toBeNull();
+  });
+});
+
+describe("ubah email pengguna", () => {
+  beforeEach(async () => {
+    freshDataDir();
+    (await import("@/lib/db")).resetDbForTests();
+  });
+  it("mengganti email, menolak email yang sudah dipakai, dan bisa masuk dengan email baru", async () => {
+    const users = await import("@/lib/users");
+    const a = await users.createUser({ email: "a@contoh.id", name: "A", role: "author", password: PW });
+    await users.createUser({ email: "b@contoh.id", name: "B", role: "author", password: PW });
+    users.setEmail(a.id, " Baru@Contoh.id ");
+    expect(users.getUser(a.id)!.email).toBe("baru@contoh.id");
+    expect(await users.authenticate("baru@contoh.id", PW)).not.toBeNull();
+    expect(await users.authenticate("a@contoh.id", PW)).toBeNull();
+    expect(() => users.setEmail(a.id, "B@contoh.id")).toThrow(/sudah dipakai/);
+  });
+});
+
+describe("Daftar Pustaka terstruktur (APA 7)", async () => {
+  const { formatSource, apaName, parseSources, sourcesToText } = await import("@/lib/references");
+  it("memformat setiap jenis sumber", () => {
+    expect(apaName("Agus Nugroho")).toBe("Nugroho, A.");
+    expect(apaName("Rizky Aditya Mahendra")).toBe("Mahendra, R. A.");
+    expect(apaName("Nugroho, A.")).toBe("Nugroho, A.");
+    expect(formatSource({ id: "1", type: "berita", authors: "Agus Nugroho", year: "2026", month: "1", day: "23", title: "Ratusan sopir angkot geruduk Balai Kota Bogor", container: "RMOL", url: "https://rmol.id/a" }))
+      .toBe("Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/a");
+    expect(formatSource({ id: "2", type: "web", authors: "World Health Organization", corporate: true, year: "2026", month: "9", day: "15", title: "Mental health at work", container: "World Health Organization", url: "https://who.int/x" }))
+      .toBe("World Health Organization. (2026, 15 September). *Mental health at work*. https://who.int/x");
+    expect(formatSource({ id: "3", type: "web", authors: "U.S. Food and Drug Administration", corporate: true, title: "Keep your air clear", url: "https://fda.gov/x", accessed: "2026-11-08" }))
+      .toBe("U.S. Food and Drug Administration. (t.t.). *Keep your air clear*. Diakses 8 November 2026, dari https://fda.gov/x");
+    expect(formatSource({ id: "4", type: "buku", authors: "Andrea Hirata", year: "2005", title: "Laskar pelangi", container: "Bentang Pustaka" }))
+      .toBe("Hirata, A. (2005). *Laskar pelangi*. Bentang Pustaka.");
+    expect(formatSource({ id: "5", type: "jurnal", authors: "Budi Santoso\nCitra Lestari", year: "2024", title: "Polusi udara kota", container: "Jurnal Kesehatan", volume: "12", issue: "3", pages: "45–67", url: "https://doi.org/10.1/x" }))
+      .toBe("Santoso, B., & Lestari, C. (2024). Polusi udara kota. *Jurnal Kesehatan*, *12*(3), 45–67. https://doi.org/10.1/x");
+    expect(formatSource({ id: "6", type: "foto", authors: "ANTARA Foto", corporate: true, year: "2021", month: "11", day: "2", title: "Uji coba Biskita", url: "https://a.com/x" }))
+      .toBe("ANTARA Foto. (2021, 2 November). *Uji coba Biskita* [Foto]. https://a.com/x");
+    expect(formatSource({ id: "7", type: "manual", text: "Bebas *miring*." })).toBe("Bebas miring.");
+  });
+  it("membaca JSON dengan aman dan menghasilkan teks", () => {
+    const list = parseSources(JSON.stringify([{ id: "a", type: "aneh", text: "X" }, { type: "berita", title: "T", year: "2026" }, 5, null]));
+    expect(list.map((s) => s.type)).toEqual(["manual", "berita"]);
+    expect(parseSources("bukan json")).toEqual([]);
+    expect(sourcesToText(list)).toBe("X\n*T*. (2026).");
+    expect(formatSource({ id: "n", type: "berita", title: "Tanpa penulis", year: "2026", month: "2", container: "RRI", url: "https://rri.co.id/x" })).toBe("*Tanpa penulis*. (2026, Februari). RRI. https://rri.co.id/x");
+  });
+});
+
+describe("Daftar Pustaka tersimpan dari sumber terstruktur", () => {
+  beforeEach(async () => {
+    freshDataDir();
+    (await import("@/lib/db")).resetDbForTests();
+  });
+  it("menyimpan JSON dan menghasilkan teks terformat, teks lama tetap bisa dibaca", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const { textToSources } = await import("@/lib/references");
+    const u = await users.createUser({ email: "a@contoh.id", name: "A", role: "author", password: PW });
+    const json = JSON.stringify([{ id: "x", type: "berita", authors: "Agus Nugroho", year: "2026", month: "1", day: "23", title: "Judul", container: "RMOL", url: "https://rmol.id/a" }]);
+    const p = posts.savePost({ title: "T", html: "<p>x</p>", status: "draft", authorId: u.id, tags: [], referencesJson: json });
+    expect(p.references_text).toBe("Nugroho, A. (2026, 23 Januari). *Judul*. RMOL. https://rmol.id/a");
+    expect(JSON.parse(p.references_json)[0].title).toBe("Judul");
+    const again = posts.savePost({ id: p.id, title: "T", html: "<p>x</p>", status: "draft", authorId: u.id, tags: [] });
+    expect(again.references_json).toBe(p.references_json);
+    expect(textToSources("Satu.\n\nDua.").map((s) => s.text)).toEqual(["Dua.", "Satu."]);
   });
 });

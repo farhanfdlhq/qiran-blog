@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { authenticate, createUser, deleteUser, getUser, setPassword, setRole, updateProfile, updateIdentity, countAdmins, type Role } from "@/lib/users";
+import { authenticate, createUser, deleteUser, getUser, setPassword, setRole, setEmail, updateProfile, updateIdentity, countAdmins, type Role } from "@/lib/users";
 import { tooManyAttempts, recordFailure, clearFailures } from "@/lib/sessions";
 import { startSession, endSession, requireUser, requireAdmin, clientIp } from "@/lib/auth";
 import { savePost, getPostById, canEdit, deletePost as removePost, updateTag, deleteTag, getAnyBySlug, bulkUpdate, type BulkAction } from "@/lib/posts";
@@ -61,6 +61,7 @@ export type EditorPayload = {
   pdfSubtitle?: string;
   referencesText?: string;
   pdfCover?: boolean;
+  referencesJson?: string;
   intent: "save" | "publish" | "unpublish";
 };
 
@@ -109,6 +110,7 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
       pdfSubtitle: payload.pdfSubtitle == null ? undefined : String(payload.pdfSubtitle),
       referencesText: payload.referencesText == null ? undefined : String(payload.referencesText),
       pdfCover: payload.pdfCover == null ? undefined : payload.pdfCover === true,
+      referencesJson: typeof payload.referencesJson === "string" ? payload.referencesJson.slice(0, 200_000) : undefined,
     });
     revalidatePath("/", "layout");
     const scheduled = saved.status === "published" && saved.published_at && saved.published_at > new Date().toISOString();
@@ -250,6 +252,23 @@ export async function manageUser(_prev: FormState, form: FormData): Promise<Form
   if (action === "delete") deleteUser(target.id);
   revalidatePath("/admin/pengguna/");
   return { ok: true, message: "Perubahan disimpan." };
+}
+
+/** Hanya admin: ganti email login seorang pengguna. */
+export async function changeUserEmail(userId: number, email: string): Promise<FormState> {
+  await requireAdmin();
+  const target = getUser(Number(userId));
+  if (!target) return { message: "Akun tidak ditemukan." };
+  const clean = String(email ?? "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean) || clean.length > 200) return { message: "Format email belum benar, contoh: nama@gmail.com." };
+  if (clean.toLowerCase() === target.email) return { ok: true, message: "Email tidak berubah." };
+  try {
+    setEmail(target.id, clean);
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : "Gagal mengganti email." };
+  }
+  revalidatePath("/admin/pengguna/");
+  return { ok: true, message: `Email ${target.name} diganti. Mulai sekarang masuk dengan ${clean.toLowerCase()}.` };
 }
 
 export async function saveSettings(_prev: FormState, form: FormData): Promise<FormState> {

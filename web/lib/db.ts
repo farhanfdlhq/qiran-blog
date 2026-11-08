@@ -146,6 +146,8 @@ const MIGRATIONS: Migration[] = [
   `,
   // v4: halaman sampul berfoto di PDF (opsional)
   `ALTER TABLE posts ADD COLUMN pdf_cover INTEGER NOT NULL DEFAULT 0;`,
+  // v5: Daftar Pustaka terstruktur (JSON); references_text tetap jadi hasil format yang dipakai situs dan PDF
+  `ALTER TABLE posts ADD COLUMN references_json TEXT NOT NULL DEFAULT '';`,
 ];
 
 function migrate(db: DB) {

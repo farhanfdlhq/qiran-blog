@@ -80,6 +80,14 @@ export function updateIdentity(userId: number, data: Identity) {
     .run(clean(data.full_name, 80), clean(data.school, 80), clean(data.region, 60), userId);
 }
 
+/** Ganti email login. Melempar galat kalau email sudah dipakai akun lain. */
+export function setEmail(userId: number, email: string) {
+  const clean = email.trim().toLowerCase();
+  const taken = getDb().prepare("SELECT id FROM users WHERE email = ? AND id != ?").get(clean, userId);
+  if (taken) throw new Error("Email itu sudah dipakai akun lain.");
+  getDb().prepare("UPDATE users SET email = ? WHERE id = ?").run(clean, userId);
+}
+
 export function setRole(userId: number, role: Role) {
   getDb().prepare("UPDATE users SET role = ? WHERE id = ?").run(role, userId);
 }

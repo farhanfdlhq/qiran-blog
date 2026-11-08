@@ -9,6 +9,9 @@ import { saveFromEditor, deletePostAction, type EditorPayload } from "@/app/acti
 import { FormDialog } from "./Dialog";
 import { ConfirmButton } from "./ConfirmButton";
 import { TagInput } from "./TagInput";
+import { DateTimeField } from "./DateTimeField";
+import { References } from "./References";
+import { parseSources, textToSources, type Source } from "@/lib/references";
 import { useFeedback } from "@/components/Feedback";
 
 type Initial = {
@@ -32,6 +35,7 @@ type Initial = {
   pdfLabel: string;
   pdfSubtitle: string;
   referencesText: string;
+  referencesJson: string;
   pdfCover: boolean;
 };
 
@@ -115,7 +119,8 @@ export function PostEditor({ initial }: { initial: Initial }) {
   const [words, setWords] = useState(0);
   const [pdfLabel, setPdfLabel] = useState(initial.pdfLabel);
   const [pdfSubtitle, setPdfSubtitle] = useState(initial.pdfSubtitle);
-  const [referencesText, setReferencesText] = useState(initial.referencesText);
+  // Daftar Pustaka lama (teks per baris) dibuka sebagai sumber "Tulis sendiri"
+  const [sources, setSources] = useState<Source[]>(() => (initial.referencesJson ? parseSources(initial.referencesJson) : textToSources(initial.referencesText)));
   const [pdfCover, setPdfCover] = useState(initial.pdfCover);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [dialog, setDialog] = useState<null | { kind: "link"; href: string } | ImageDialog>(null);
@@ -182,7 +187,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
         publishAt,
         pdfLabel,
         pdfSubtitle,
-        referencesText,
+        referencesJson: JSON.stringify(sources),
         pdfCover,
         intent,
       };
@@ -211,7 +216,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
       }
       return true;
     },
-    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, pdfLabel, pdfSubtitle, referencesText, pdfCover, isPage, toast],
+    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, pdfLabel, pdfSubtitle, sources, pdfCover, isPage, toast],
   );
 
   // Simpan otomatis untuk draf, 4 detik setelah berhenti mengetik
@@ -219,7 +224,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
     if (!dirty || status !== "draft" || saving || saveFailed) return;
     const t = setTimeout(() => save("save"), 4000);
     return () => clearTimeout(t);
-  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags, pdfLabel, pdfSubtitle, referencesText, pdfCover]);
+  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags, pdfLabel, pdfSubtitle, sources, pdfCover]);
 
   // Ctrl/Cmd+S untuk menyimpan, dan peringatan kalau keluar sebelum tersimpan
   useEffect(() => {
@@ -407,7 +412,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
           {!isPage ? (
             <div className="field">
               <label htmlFor="publishAt">Tanggal terbit (WIB)</label>
-              <input id="publishAt" type="datetime-local" value={publishAt} onChange={(e) => touch(setPublishAt)(e.target.value)} aria-describedby="publish-hint" />
+              <DateTimeField id="publishAt" value={publishAt} onChange={touch(setPublishAt)} describedBy="publish-hint" placeholder="Terbit saat tombol Terbitkan diklik" />
               <p className="hint" id="publish-hint">
                 Kosongkan untuk terbit sekarang. Isi waktu yang akan datang untuk menjadwalkan.{" "}
                 {publishAt ? <button type="button" className="textbtn" onClick={() => touch(setPublishAt)("")}>Hapus tanggal</button> : null}
@@ -436,10 +441,9 @@ export function PostEditor({ initial }: { initial: Initial }) {
           ) : null}
           {!isPage ? (
             <div className="field">
-              <label htmlFor="refs">Daftar Pustaka</label>
-              <textarea id="refs" value={referencesText} maxLength={20000} onChange={(e) => touch(setReferencesText)(e.target.value)}
-                aria-describedby="refs-hint" style={{ minHeight: 140 }} placeholder={"Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/…"} />
-              <p className="hint" id="refs-hint">Satu sumber per baris, gaya APA 7. Apit judul dengan *bintang* supaya miring. Urutan abjad diatur otomatis. Tampil di akhir tulisan dan di PDF.</p>
+              <span className="field-label" id="refs-label">Daftar Pustaka</span>
+              <References value={sources} onChange={touch(setSources)} />
+              <p className="hint">Gaya APA 7, diurutkan sesuai abjad secara otomatis. Tampil di akhir tulisan dan di lembar terpisah di PDF.</p>
             </div>
           ) : null}
           {!isPage ? (

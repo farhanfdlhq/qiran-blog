@@ -7,7 +7,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
   return (
     <html lang="id" data-mode="auto">
       <body>
-        <ErrorView reset={reset} digest={error.digest} />
+        <ErrorView reset={reset} digest={error.digest} error={error} />
       </body>
     </html>
   );

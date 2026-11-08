@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { listUsers } from "@/lib/users";
 import { addUser, manageUser } from "@/app/actions/admin";
+import { Select } from "@/components/admin/Select";
+import { EmailButton } from "@/components/admin/EmailButton";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 
@@ -23,6 +25,7 @@ export default async function UsersPage() {
               <div className="list-meta"><span>{u.email}</span><span>{u.role === "admin" ? "Admin" : "Penulis"}</span><span>{u.post_count} tulisan</span></div>
               <ActionForm action={manageUser} className="btn-row">
                 <input type="hidden" name="id" value={u.id} />
+                <EmailButton id={u.id} name={u.name} email={u.email} />
                 <ConfirmButton name="action" value="reset" title={`Buat password baru untuk ${u.name}?`} message="Password lama langsung tidak berlaku dan semua perangkat yang sedang masuk akan keluar." confirmLabel="Buat password baru">Buat password baru</ConfirmButton>
                 {u.id !== me.id ? (
                   <>
@@ -52,10 +55,10 @@ export default async function UsersPage() {
           </div>
           <div className="field">
             <label htmlFor="new-role">Peran</label>
-            <select id="new-role" name="role" defaultValue="author">
-              <option value="author">Penulis</option>
-              <option value="admin">Admin</option>
-            </select>
+            <Select id="new-role" name="role" defaultValue="author" options={[
+              { value: "author", label: "Penulis", hint: "menulis dan menerbitkan" },
+              { value: "admin", label: "Admin", hint: "mengatur semuanya" },
+            ]} />
           </div>
           <p className="hint">Password sementara akan muncul setelah akun dibuat. Sampaikan langsung ke orangnya, lalu minta diganti di menu Akun saya.</p>
           <div><button className="btn" type="submit">Tambah</button></div>

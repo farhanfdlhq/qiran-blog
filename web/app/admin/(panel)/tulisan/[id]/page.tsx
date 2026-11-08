@@ -32,6 +32,7 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
         pdfLabel: post.pdf_label,
         pdfSubtitle: post.pdf_subtitle,
         referencesText: post.references_text,
+        referencesJson: post.references_json,
         pdfCover: post.pdf_cover === 1,
       }}
     />

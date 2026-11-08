@@ -78,7 +78,19 @@ try {
   await page.setInputFiles('.cover input[type=file]', imgPath);
   await page.waitForSelector(".cover img", { timeout: 15000 });
   check("unggah gambar sampul", (await page.getAttribute(".cover img", "src")).startsWith("/uploads/"));
-  await page.fill("#refs", "Nugroho, A. (2026). *Judul berita*. RMOL. https://rmol.id/contoh");
+  // Daftar Pustaka lewat dialog sumber (seperti Word)
+  await page.click("button:has-text('+ Tambah sumber')");
+  await page.waitForSelector(".dialog[open] #src-dialog-title");
+  await page.fill("#src-authors", "Agus Nugroho");
+  await page.fill("#src-year", "2026");
+  await page.click("#src-month");
+  await page.click(".select-list .select-option:has-text('Januari')");
+  await page.fill("#src-title", "Judul berita");
+  await page.fill("#src-container", "RMOL");
+  await page.fill("#src-url", "https://rmol.id/contoh");
+  check("pratinjau sumber berformat APA", (await page.textContent(".source-preview-text")).includes("Nugroho, A. (2026, Januari). Judul berita. RMOL. https://rmol.id/contoh"));
+  await page.click(".dialog[open] button:has-text('Tambahkan')");
+  check("sumber masuk ke Daftar Pustaka", await page.locator(".refs-item em:has-text('Judul berita')").isVisible({ timeout: 3000 }).catch(() => false));
   await page.fill("#pdfLabel", "Artikel Opini");
   await page.click("text=Terbitkan");
   await page.waitForSelector(".toast-ok:has-text('Tulisan diterbitkan!')", { timeout: 10000 });
@@ -123,8 +135,13 @@ try {
   await page.fill(".editor-title", "Tulisan untuk minggu depan");
   await page.click(".prose");
   await page.keyboard.type("Isi terjadwal.");
-  const future = new Date(Date.now() + 7 * 86400_000 + 7 * 3600_000).toISOString().slice(0, 16);
-  await page.fill("#publishAt", future);
+  // Pemilih tanggal qiran: bulan depan, tanggal 15, jam 09.00
+  await page.click("#publishAt");
+  await page.click(".dtf-panel button[aria-label='Bulan berikutnya']");
+  await page.click(".dtf-day:text-is('15')");
+  await page.click(".dtf-col[aria-label='Jam'] .dtf-t:text-is('09')");
+  await page.click(".dtf-panel button:has-text('Selesai')");
+  check("pemilih tanggal qiran mengisi jadwal", (await page.textContent("#publishAt")).includes("09.00 WIB"));
   await page.click("text=Jadwalkan");
   await page.waitForSelector(".toast:has-text('Tulisan dijadwalkan.')", { timeout: 10000 });
   const anon = await browser.newContext({ userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36" });
@@ -192,6 +209,22 @@ try {
   await adm.click("text=Simpan pengaturan");
   await adm.waitForSelector(".toast:has-text('Pengaturan disimpan.')", { timeout: 10000 });
   check("admin menyimpan pengaturan", true);
+  // Admin mengganti email penulis, penulis bisa masuk dengan email baru
+  const newEmail = "baru-" + AUTHOR.email;
+  const changeEmail = async (from, to) => {
+    await adm.goto(BASE + "/admin/pengguna/");
+    await adm.click(`li.list-item:has-text('${from}') button:has-text('Ubah email')`);
+    await adm.fill(".dialog[open] #dlg-email", to);
+    await adm.click(".dialog[open] button:has-text('Simpan email')");
+    await adm.waitForSelector(`.list-meta:has-text('${to}')`, { timeout: 10000 });
+  };
+  await changeEmail(AUTHOR.email, newEmail);
+  const ec = await browser.newContext();
+  const ep = await ec.newPage();
+  await login(ep, { email: newEmail, password: AUTHOR.password });
+  check("admin mengganti email penulis, penulis masuk dengan email baru", ep.url().endsWith("/admin/"));
+  await ec.close();
+  await changeEmail(newEmail, AUTHOR.email);
   await adm.goto(BASE + "/admin/statistik/");
   check("statistik admin mencatat pembaca", Number(await adm.textContent(".stat-num")) >= 1);
 
