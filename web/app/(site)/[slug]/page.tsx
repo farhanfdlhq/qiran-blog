@@ -12,6 +12,7 @@ import { CommentForm } from "@/components/CommentForm";
 import { ShareButtons } from "@/components/ShareButtons";
 import { numberFigures } from "@/lib/figures";
 import { referencesHtml } from "@/lib/references";
+import { isPortraitUpload } from "@/lib/uploads";
 import { shareMeta } from "@/lib/meta";
 import { ogImagePath } from "@/lib/og";
 
@@ -67,6 +68,7 @@ export default async function PostPage({ params }: Props) {
   const comments = isPost ? listApproved(post.id) : [];
   const commentsOpen = isPost && !preview && post.allow_comments === 1 && s.comments_enabled === "1";
   const refs = isPost ? referencesHtml(post.references_text) : "";
+  const portrait = post.feature_image ? await isPortraitUpload(post.feature_image) : false;
   const more = isPost ? listPublished({ page: 1, perPage: 5, excludeId: post.id }).items : [];
 
   const jsonLd = isPost
@@ -109,7 +111,7 @@ export default async function PostPage({ params }: Props) {
         </header>
 
         {post.feature_image ? (
-          <figure className="article-figure">
+          <figure className={`article-figure${portrait ? " is-portrait" : ""}`}>
             <img src={post.feature_image} srcSet={imgSrcSet(post.feature_image)} sizes="(min-width: 1100px) 1100px, 100vw"
               alt={post.feature_image_alt || post.title} width={2000} height={1250} fetchPriority="high" />
             {post.feature_image_caption ? <figcaption>{post.feature_image_caption}</figcaption> : null}

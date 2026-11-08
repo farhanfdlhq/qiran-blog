@@ -60,6 +60,7 @@ export type EditorPayload = {
   pdfLabel?: string;
   pdfSubtitle?: string;
   referencesText?: string;
+  pdfCover?: boolean;
   intent: "save" | "publish" | "unpublish";
 };
 
@@ -107,6 +108,7 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
       pdfLabel: payload.pdfLabel == null ? undefined : String(payload.pdfLabel),
       pdfSubtitle: payload.pdfSubtitle == null ? undefined : String(payload.pdfSubtitle),
       referencesText: payload.referencesText == null ? undefined : String(payload.referencesText),
+      pdfCover: payload.pdfCover == null ? undefined : payload.pdfCover === true,
     });
     revalidatePath("/", "layout");
     const scheduled = saved.status === "published" && saved.published_at && saved.published_at > new Date().toISOString();

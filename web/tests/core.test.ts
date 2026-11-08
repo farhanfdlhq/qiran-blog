@@ -453,7 +453,7 @@ describe("PDF: templat", async () => {
     id: 1, type: "post", title: "Kemudi Nestapa", slug: "kemudi", excerpt: "", content_json: null,
     content_html: '<p>Isi pertama.</p><figure class="qiran-fig"><img src="https://luar.example/x.jpg" alt=""><figcaption><span class="fig-caption">Demo</span> <span class="fig-source">(Sumber: RMOL)</span></figcaption></figure>',
     plain_text: "Isi pertama.", feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null,
-    allow_comments: 1, author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Potret Sopir Angkot", references_text: "A. (2026). *Judul*. https://a.id",
+    allow_comments: 1, author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Potret Sopir Angkot", references_text: "A. (2026). *Judul*. https://a.id", pdf_cover: 0,
     created_at: "2026-11-08T00:00:00.000Z", updated_at: "2026-11-08T00:00:00.000Z", tags: [], author: null, ...over,
   } as P);
   const id = { full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Provinsi Jawa Barat" };
@@ -504,7 +504,7 @@ describe("PDF: Daftar Pustaka di lembar sendiri", async () => {
   it("pustaka berada di luar kolom isi dan dimulai di halaman baru", () => {
     const post = { id: 1, type: "post", title: "T", slug: "t", excerpt: "", content_json: null, content_html: "<p>Isi.</p>", plain_text: "Isi.",
       feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null, allow_comments: 1, author_id: 1,
-      pdf_label: "", pdf_subtitle: "", references_text: "Satu sumber.", created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
+      pdf_label: "", pdf_subtitle: "", references_text: "Satu sumber.", pdf_cover: 0, created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
     const html = pdfHtml(post, { full_name: "Q", school: "", region: "" }, "Q", { uploadsDir: "/x" });
     const cols = html.slice(html.indexOf('<div class="cols">'), html.indexOf("</div>", html.indexOf('<div class="cols">')));
     expect(cols).not.toContain("Daftar Pustaka");
@@ -514,5 +514,26 @@ describe("PDF: Daftar Pustaka di lembar sendiri", async () => {
     const tanpa = pdfHtml({ ...post, references_text: "" }, { full_name: "Q", school: "", region: "" }, "Q", { uploadsDir: "/x" });
     expect(tanpa).not.toContain("refs-page\">");
     expect(tanpa).toContain("Disusun oleh: Q");
+  });
+});
+
+describe("PDF: halaman sampul", async () => {
+  const { pdfCoverHtml } = await import("@/lib/pdf/template");
+  it("hanya dibuat kalau diminta dan fotonya ada, dengan teks yang di-escape", () => {
+    const dir = freshDataDir();
+    const up = path.join(dir, "uploads", "2026");
+    fs.mkdirSync(up, { recursive: true });
+    fs.writeFileSync(path.join(up, "s.jpg"), Buffer.from([0xff, 0xd8, 0xff, 0xd9]));
+    const post = { id: 1, type: "post", title: "Kemudi <b>", slug: "k", excerpt: "", content_json: null, content_html: "<p>x</p>", plain_text: "x",
+      feature_image: "/uploads/2026/s.jpg", feature_image_alt: "", feature_image_caption: "Foto: Q", status: "draft", published_at: null, allow_comments: 1,
+      author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Sub", references_text: "", pdf_cover: 1, created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfCoverHtml>[0];
+    const id = { full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Jawa Barat" };
+    const html = pdfCoverHtml(post, id, "Qirani", { uploadsDir: path.join(dir, "uploads") })!;
+    expect(html).toContain("Kemudi &lt;b&gt;");
+    expect(html).toContain("Qirani Azzahra");
+    expect(html).toContain("SMAN 2 Bogor · Jawa Barat");
+    expect(html).toContain("data:image/jpeg;base64,");
+    expect(pdfCoverHtml({ ...post, pdf_cover: 0 }, id, "Q", { uploadsDir: path.join(dir, "uploads") })).toBeNull();
+    expect(pdfCoverHtml({ ...post, feature_image: "https://luar/x.jpg" }, id, "Q", { uploadsDir: path.join(dir, "uploads") })).toBeNull();
   });
 });

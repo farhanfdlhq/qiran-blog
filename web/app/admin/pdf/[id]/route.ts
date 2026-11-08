@@ -4,7 +4,7 @@ import { getSessionUserFromCookie } from "@/lib/auth";
 import { getFullById, canEdit } from "@/lib/posts";
 import { getIdentity } from "@/lib/users";
 import { dataDir, uploadsDir } from "@/lib/db";
-import { pdfHtml, pdfFileName, pdfCacheKey } from "@/lib/pdf/template";
+import { pdfHtml, pdfCoverHtml, pdfFileName, pdfCacheKey } from "@/lib/pdf/template";
 import { renderPdf, PdfUnavailableError, PdfBusyError } from "@/lib/pdf/render";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +48,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   } else {
     if (limited(user.id)) return err(429, "Terlalu banyak membuat PDF. Tunggu beberapa menit lalu coba lagi.");
     try {
-      pdf = await renderPdf(pdfHtml(post, identity, authorName, { uploadsDir: uploadsDir() }));
+      const opts = { uploadsDir: uploadsDir() };
+      pdf = await renderPdf(pdfHtml(post, identity, authorName, opts), pdfCoverHtml(post, identity, authorName, opts));
     } catch (e) {
       if (e instanceof PdfUnavailableError) return err(503, "PDF belum bisa dibuat di server ini. Minta kakak menjalankan langkah pemasangan PDF.");
       if (e instanceof PdfBusyError) return err(503, e.message);

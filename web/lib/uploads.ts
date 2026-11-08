@@ -36,3 +36,21 @@ export async function storeImage(input: Buffer, originalName: string): Promise<s
   for (const w of IMAGE_WIDTHS) await pipeline(w).toFile(path.join(dir, `${base}-w${w}.${ext}`));
   return `/uploads/${sub.split(path.sep).join("/")}/${base}.${ext}`;
 }
+
+/** Foto unggahan berorientasi tegak (lebih tinggi daripada lebar)? Dibaca dari header file, hasilnya diingat. */
+const orientationCache = new Map<string, boolean>();
+export async function isPortraitUpload(url: string): Promise<boolean> {
+  if (!url.startsWith("/uploads/")) return false;
+  if (orientationCache.has(url)) return orientationCache.get(url)!;
+  let portrait = false;
+  try {
+    const root = uploadsDir();
+    const file = path.resolve(/*turbopackIgnore: true*/ root, decodeURIComponent(url.slice("/uploads/".length)));
+    if (file.startsWith(root + path.sep) && fs.existsSync(file)) {
+      const m = await sharp(file).metadata();
+      portrait = !!m.width && !!m.height && m.height > m.width * 1.05;
+    }
+  } catch {}
+  orientationCache.set(url, portrait);
+  return portrait;
+}

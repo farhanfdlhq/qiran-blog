@@ -62,7 +62,8 @@ Setiap tulisan bisa diunduh sebagai PDF A4 yang siap dikirim ke guru atau paniti
 2. Di kolom kanan editor, bagian **PDF untuk tugas dan lomba**:
    - **Label jenis tulisan**, misalnya "Artikel Opini". Kalau kosong, dipakai tag pertama.
    - **Subjudul**, misalnya "Potret Fisik dan Mental Sopir Angkot di Jantung Kota Hujan". Dicetak setelah judul: "Kemudi Nestapa: Potret Fisik…".
-3. Klik **Unduh PDF**. Kalau ada perubahan yang belum tersimpan, disimpan dulu otomatis. Berkasnya bernama `Judul_Nama_Lengkap.pdf`.
+3. Kalau tulisan punya gambar sampul, centang **Pakai halaman sampul berfoto** supaya PDF dibuka dengan halaman sampul: foto penuh, label, judul, subjudul, nama lengkap, dan sekolah. Halaman isi tetap diberi nomor mulai dari 1. Foto tegak (portrait) paling cocok untuk sampul A4.
+4. Klik **Unduh PDF**. Kalau ada perubahan yang belum tersimpan, disimpan dulu otomatis. Berkasnya bernama `Judul_Nama_Lengkap.pdf`.
 
 Kalau panitia minta format lain (misalnya satu kolom atau spasi 2), bilang ke kakak.
 

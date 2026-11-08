@@ -83,7 +83,9 @@ Satu perintah untuk mengisi 6 tulisan contoh, halaman Tentang, tag, dan fotonya.
 cd /opt/qiran-blog/web && npm run seed
 ```
 
-Semua tulisan tercatat atas nama admin pertama. Pakai `npm run seed -- --author email@...` untuk akun lain. Perintah ini aman dijalankan ulang, karena tulisan yang sudah ada akan dilewati.
+Perintah ini juga memasukkan artikel Qirani **"Kemudi Nestapa"** (lengkap dengan 3 gambar, Daftar Pustaka, dan halaman sampul PDF) sebagai **draf** atas nama akun Qirani. Buat akun Qirani dulu (`--name "Qirani"`) sebelum menjalankan seed. Kalau akunnya belum ada, artikel masuk atas nama admin. Qirani sendiri yang memutuskan kapan menerbitkannya.
+
+Tulisan contoh lain tercatat atas nama admin pertama. Pakai `npm run seed -- --author email@...` untuk akun lain. Perintah ini aman dijalankan ulang, karena tulisan yang sudah ada akan dilewati.
 
 Kalau di Ghost sudah ada tulisan baru yang ingin ikut dipindahkan, pakai impor dari ekspor Ghost (Settings → Import/Export → Export content):
 

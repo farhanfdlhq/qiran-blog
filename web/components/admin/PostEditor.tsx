@@ -32,6 +32,7 @@ type Initial = {
   pdfLabel: string;
   pdfSubtitle: string;
   referencesText: string;
+  pdfCover: boolean;
 };
 
 type ImageDialog = { kind: "image"; url: string; alt: string; caption: string; source: string; pos?: number };
@@ -115,6 +116,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
   const [pdfLabel, setPdfLabel] = useState(initial.pdfLabel);
   const [pdfSubtitle, setPdfSubtitle] = useState(initial.pdfSubtitle);
   const [referencesText, setReferencesText] = useState(initial.referencesText);
+  const [pdfCover, setPdfCover] = useState(initial.pdfCover);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [dialog, setDialog] = useState<null | { kind: "link"; href: string } | ImageDialog>(null);
   const { toast, confirm } = useFeedback();
@@ -181,6 +183,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
         pdfLabel,
         pdfSubtitle,
         referencesText,
+        pdfCover,
         intent,
       };
       try {
@@ -208,7 +211,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
       }
       return true;
     },
-    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, pdfLabel, pdfSubtitle, referencesText, isPage, toast],
+    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, pdfLabel, pdfSubtitle, referencesText, pdfCover, isPage, toast],
   );
 
   // Simpan otomatis untuk draf, 4 detik setelah berhenti mengetik
@@ -216,7 +219,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
     if (!dirty || status !== "draft" || saving || saveFailed) return;
     const t = setTimeout(() => save("save"), 4000);
     return () => clearTimeout(t);
-  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags, pdfLabel, pdfSubtitle, referencesText]);
+  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags, pdfLabel, pdfSubtitle, referencesText, pdfCover]);
 
   // Ctrl/Cmd+S untuk menyimpan, dan peringatan kalau keluar sebelum tersimpan
   useEffect(() => {
@@ -452,6 +455,13 @@ export function PostEditor({ initial }: { initial: Initial }) {
                 <input id="pdfSubtitle" value={pdfSubtitle} maxLength={160} onChange={(e) => touch(setPdfSubtitle)(e.target.value)} aria-describedby="pdfsub-hint" />
                 <p className="hint" id="pdfsub-hint">Dicetak setelah judul: &ldquo;Judul: Subjudul&rdquo;. Boleh dikosongkan.</p>
               </div>
+              <label className="check">
+                <input type="checkbox" checked={pdfCover && !!cover} disabled={!cover} onChange={(e) => touch(setPdfCover)(e.target.checked)} aria-describedby="pdfcover-hint" />
+                Pakai halaman sampul berfoto
+              </label>
+              <p className="hint" id="pdfcover-hint" style={{ marginTop: -8 }}>
+                {cover ? "Gambar sampul jadi foto penuh di halaman pertama, dengan judul dan identitasmu." : "Tambahkan gambar sampul dulu untuk memakai halaman sampul."}
+              </p>
               <button className="btn btn-small" type="button" onClick={downloadPdf} disabled={pdfBusy || saving} aria-busy={pdfBusy}>
                 {pdfBusy ? "Membuat PDF…" : "Unduh PDF"}
               </button>

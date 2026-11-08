@@ -144,6 +144,8 @@ const MIGRATIONS: Migration[] = [
   ALTER TABLE posts ADD COLUMN pdf_subtitle TEXT NOT NULL DEFAULT '';
   ALTER TABLE posts ADD COLUMN references_text TEXT NOT NULL DEFAULT '';
   `,
+  // v4: halaman sampul berfoto di PDF (opsional)
+  `ALTER TABLE posts ADD COLUMN pdf_cover INTEGER NOT NULL DEFAULT 0;`,
 ];
 
 function migrate(db: DB) {

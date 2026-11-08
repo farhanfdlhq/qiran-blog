@@ -13,7 +13,7 @@ import { numberFigures } from "../figures";
 import { referencesHtml } from "../references";
 
 /** Naikkan kalau tampilan templat berubah, supaya PDF lama di cache dibuat ulang. */
-export const TEMPLATE_VERSION = "5";
+export const TEMPLATE_VERSION = "7";
 
 const C = { ink: "#161c1a", muted: "#4d5550", accent: "#9fc7b8", surface: "#d6d5cc" };
 
@@ -24,13 +24,13 @@ function esc(s: string): string {
 const MIME: Record<string, string> = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif" };
 
 /** Gambar unggahan dibaca dari disk sebagai data URI (varian 1400px kalau ada). Selain itu: null. */
-function localImage(src: string, uploadsDir: string): string | null {
+function localImage(src: string, uploadsDir: string, preferSmall = true): string | null {
   if (!src.startsWith("/uploads/")) return null;
   const rel = decodeURIComponent(src.slice("/uploads/".length).split("?")[0]);
   const original = path.resolve(/*turbopackIgnore: true*/ uploadsDir, rel);
   if (!original.startsWith(path.resolve(uploadsDir) + path.sep)) return null;
   const variant = original.replace(/\.(jpe?g|png|webp)$/i, "-w1400.$1");
-  const file = fs.existsSync(variant) ? variant : original;
+  const file = preferSmall && fs.existsSync(variant) ? variant : original;
   const type = MIME[path.extname(file).toLowerCase()];
   if (!type || !fs.existsSync(file)) return null;
   return `data:${type};base64,${fs.readFileSync(file).toString("base64")}`;
@@ -53,7 +53,8 @@ export function pdfHtml(post: PostFull, identity: Identity, authorName: string, 
   const title = post.pdf_subtitle ? `${post.title}: ${post.pdf_subtitle}` : post.title;
   const name = identity.full_name || authorName;
   const byline = [name, identity.school, identity.region].map((s) => s.trim()).filter(Boolean).join(", ");
-  const cover = post.feature_image ? localImage(post.feature_image, opts.uploadsDir) : null;
+  // Kalau halaman sampul berfoto dipakai, foto yang sama tidak diulang di halaman isi
+  const cover = post.feature_image && !post.pdf_cover ? localImage(post.feature_image, opts.uploadsDir) : null;
   const body = inlineImages(numberFigures(post.content_html), opts.uploadsDir);
   const refs = referencesHtml(post.references_text);
 
@@ -82,7 +83,7 @@ h1 { margin: 0 0 16pt; text-align: center; font-size: 14pt; line-height: 1.4; fo
 .cols h2, .cols h3, .cols h4 { margin: 10pt 0 4pt; font-size: 12pt; line-height: 1.4; break-after: avoid; }
 .cols h3, .cols h4 { font-style: italic; }
 .cols blockquote { margin: 6pt 0 8pt 0.6cm; padding-left: 8pt; border-left: 2pt solid ${C.accent}; font-style: italic; }
-.cols blockquote p { text-indent: 0; }
+.cols blockquote p { text-indent: 0; text-align: left; }
 .cols ul, .cols ol { margin: 0 0 6pt; padding-left: 1.27cm; }
 .cols li { text-align: justify; }
 .cols mark { background: ${C.accent}; color: inherit; }
@@ -121,6 +122,61 @@ ${byline ? `<p class="byline">Disusun oleh: ${esc(byline)}</p>` : ""}
 </html>`;
 }
 
+/**
+ * Halaman sampul berfoto (opsional): foto sampul memenuhi halaman, judul dan identitas di atasnya.
+ * Tetap Times New Roman, warna dari palet qiran mode terang. Null kalau tidak dipakai atau foto tidak ada.
+ */
+export function pdfCoverHtml(post: PostFull, identity: Identity, authorName: string, opts: { uploadsDir: string }): string | null {
+  if (!post.pdf_cover || !post.feature_image) return null;
+  const photo = localImage(post.feature_image, opts.uploadsDir, false);
+  if (!photo) return null;
+  const label = post.pdf_label || post.tags[0]?.name || "";
+  const year = (post.published_at ? new Date(post.published_at) : new Date()).getFullYear();
+  const name = identity.full_name || authorName;
+  const place = [identity.school, identity.region].map((x) => x.trim()).filter(Boolean).join(" · ");
+  const corner = [identity.school.trim(), String(year)].filter(Boolean).join(" · ");
+  return `<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 210mm; height: 297mm; }
+body {
+  position: relative; overflow: hidden; color: #fff; background: ${C.ink};
+  font-family: "Times New Roman", "Liberation Serif", Tinos, serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 55%; }
+.shade { position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(22,28,26,.86) 0%, rgba(22,28,26,.55) 30%, rgba(22,28,26,0) 52%),
+    linear-gradient(0deg, rgba(22,28,26,.92) 0%, rgba(22,28,26,.6) 16%, rgba(22,28,26,0) 34%); }
+.top { position: absolute; top: 2cm; left: 2cm; right: 2cm; display: flex; justify-content: space-between; align-items: center; }
+.pill { display: inline-block; padding: 4pt 12pt; border-radius: 999px; background: ${C.accent}; color: ${C.ink}; font-weight: bold; font-size: 10pt; letter-spacing: .06em; text-transform: uppercase; }
+.corner { font-size: 10pt; letter-spacing: .08em; text-transform: uppercase; color: #e3e2da; }
+.heading { position: absolute; top: 4.2cm; left: 2cm; right: 2cm; }
+.bar { width: 1.6cm; height: 3pt; background: ${C.accent}; margin-bottom: 14pt; }
+h1 { margin: 0; font-size: ${post.title.length > 28 ? 34 : 44}pt; line-height: 1.05; font-weight: bold; text-shadow: 0 1pt 8pt rgba(0,0,0,.35); }
+.sub { margin: 12pt 0 0; max-width: 12cm; font-size: 15pt; line-height: 1.35; font-style: italic; color: #e3e2da; }
+.foot { position: absolute; left: 2cm; right: 2cm; bottom: 1.8cm; padding-top: 10pt; border-top: 0.75pt solid rgba(227,226,218,.45);
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 1cm; }
+.name { margin: 0; font-size: 14pt; font-weight: bold; }
+.place { margin: 2pt 0 0; font-size: 11pt; color: #e3e2da; }
+.credit { margin: 0; max-width: 7cm; text-align: right; font-size: 8pt; font-style: italic; color: rgba(227,226,218,.8); }
+</style>
+</head>
+<body>
+<img class="photo" src="${photo}" alt="">
+<div class="shade"></div>
+<div class="top">${label ? `<span class="pill">${esc(label)}</span>` : "<span></span>"}<span class="corner">${esc(corner)}</span></div>
+<div class="heading"><div class="bar"></div><h1>${esc(post.title)}</h1>${post.pdf_subtitle ? `<p class="sub">${esc(post.pdf_subtitle)}</p>` : ""}</div>
+<div class="foot"><div><p class="name">${esc(name)}</p>${place ? `<p class="place">${esc(place)}</p>` : ""}</div>${post.feature_image_caption ? `<p class="credit">${esc(post.feature_image_caption)}</p>` : ""}</div>
+</body>
+</html>`;
+}
+
 export function pdfFileName(title: string, name: string): string {
   // Huruf besar-kecil dipertahankan; aksen dan tanda baca jadi garis bawah
   const part = (v: string) =>
@@ -131,7 +187,7 @@ export function pdfFileName(title: string, name: string): string {
 export function pdfCacheKey(post: PostFull, identity: Identity, authorName: string): string {
   const parts = [
     TEMPLATE_VERSION, post.title, post.pdf_label, post.pdf_subtitle, post.tags[0]?.name ?? "", post.content_html,
-    post.references_text, post.feature_image, post.feature_image_caption, identity, authorName,
+    post.references_text, post.feature_image, post.feature_image_caption, post.pdf_cover, identity, authorName,
   ];
   return crypto.createHash("sha1").update(JSON.stringify(parts)).digest("hex").slice(0, 16);
 }

@@ -17,7 +17,7 @@ const MAX_PENDING = 4; // 1 berjalan + 3 menunggu
 let queue: Promise<unknown> = Promise.resolve();
 let pending = 0;
 
-async function render(html: string): Promise<Buffer> {
+async function render(html: string, coverHtml: string | null): Promise<Buffer> {
   let browser: Browser | undefined;
   const timer = new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Waktu membuat PDF habis.")), TIMEOUT_MS));
   try {
@@ -32,15 +32,14 @@ async function render(html: string): Promise<Buffer> {
       const context = await browser.newContext({ javaScriptEnabled: false, offline: true });
       await context.route("**/*", (route) => route.abort());
       const page = await context.newPage();
-      await page.setContent(html, { waitUntil: "load", timeout: TIMEOUT_MS });
-      await page.emulateMedia({ media: "print" });
-      const pdf = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        preferCSSPageSize: true,
-        tagged: true,
-      });
-      return addFrame(pdf);
+      const toPdf = async (doc: string) => {
+        await page.setContent(doc, { waitUntil: "load", timeout: TIMEOUT_MS });
+        await page.emulateMedia({ media: "print" });
+        return page.pdf({ format: "A4", printBackground: true, preferCSSPageSize: true, tagged: true });
+      };
+      const body = await toPdf(html);
+      const cover = coverHtml ? await toPdf(coverHtml) : null;
+      return finish(body, cover);
     })();
     return await Promise.race([work, timer]);
   } finally {
@@ -49,16 +48,16 @@ async function render(html: string): Promise<Buffer> {
 }
 
 /**
- * Bingkai tipis di setiap halaman (0,8 cm dari tepi kertas, warna tinta qiran #161c1a)
- * dan nomor halaman di tengah bawah, di dalam bingkai (warna muted #4d5550).
+ * Menggabungkan sampul (opsional, satu halaman tanpa bingkai dan nomor) dengan isi.
+ * Halaman isi diberi bingkai tipis 0,8 cm dari tepi kertas (#161c1a) dan nomor halaman
+ * mulai dari 1 di tengah bawah, di dalam bingkai (#4d5550).
  */
-async function addFrame(pdf: Uint8Array): Promise<Buffer> {
-  const doc = await PDFDocument.load(pdf);
+async function finish(body: Uint8Array, cover: Uint8Array | null): Promise<Buffer> {
+  const doc = await PDFDocument.load(body);
   const font = await doc.embedFont(StandardFonts.TimesRoman);
   const cm = 72 / 2.54;
   const inset = 0.8 * cm;
-  const pages = doc.getPages();
-  pages.forEach((page, i) => {
+  doc.getPages().forEach((page, i) => {
     const { width, height } = page.getSize();
     page.drawRectangle({
       x: inset, y: inset, width: width - inset * 2, height: height - inset * 2,
@@ -68,13 +67,18 @@ async function addFrame(pdf: Uint8Array): Promise<Buffer> {
     const size = 10;
     page.drawText(label, { x: (width - font.widthOfTextAtSize(label, size)) / 2, y: 1.6 * cm, size, font, color: rgb(0x4d / 255, 0x55 / 255, 0x50 / 255) });
   });
+  if (cover) {
+    const coverDoc = await PDFDocument.load(cover);
+    const [first] = await doc.copyPages(coverDoc, [0]);
+    doc.insertPage(0, first);
+  }
   return Buffer.from(await doc.save());
 }
 
-export async function renderPdf(html: string): Promise<Buffer> {
+export async function renderPdf(html: string, coverHtml: string | null = null): Promise<Buffer> {
   if (pending >= MAX_PENDING) throw new PdfBusyError("Sedang banyak permintaan PDF. Coba lagi sebentar lagi.");
   pending++;
-  const run = queue.then(() => render(html));
+  const run = queue.then(() => render(html, coverHtml));
   queue = run.catch(() => undefined);
   try {
     return await run;
