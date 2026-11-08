@@ -65,6 +65,21 @@ export function updateProfile(userId: number, data: { name: string; bio: string;
     .run(data.name.trim(), slug, data.bio.trim(), data.avatar ?? null, data.email?.trim().toLowerCase() ?? null, userId);
 }
 
+/** Identitas lengkap untuk PDF tugas dan lomba. Sengaja tidak ada di COLS, supaya tidak ikut ke data publik. */
+export type Identity = { full_name: string; school: string; region: string };
+
+export function getIdentity(userId: number): Identity {
+  const row = getDb().prepare("SELECT full_name, school, region FROM users WHERE id = ?").get(userId) as Identity | undefined;
+  return row ?? { full_name: "", school: "", region: "" };
+}
+
+export function updateIdentity(userId: number, data: Identity) {
+  const clean = (v: string, max: number) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
+  getDb()
+    .prepare("UPDATE users SET full_name = ?, school = ?, region = ? WHERE id = ?")
+    .run(clean(data.full_name, 80), clean(data.school, 80), clean(data.region, 60), userId);
+}
+
 export function setRole(userId: number, role: Role) {
   getDb().prepare("UPDATE users SET role = ? WHERE id = ?").run(role, userId);
 }

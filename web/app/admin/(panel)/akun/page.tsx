@@ -1,11 +1,13 @@
 import { requireUser } from "@/lib/auth";
-import { saveProfile, changePassword } from "@/app/actions/admin";
+import { saveProfile, saveIdentity, changePassword } from "@/app/actions/admin";
+import { getIdentity } from "@/lib/users";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { AvatarField } from "@/components/admin/AvatarField";
 import { PasswordInput } from "@/components/admin/PasswordInput";
 
 export default async function AccountPage() {
   const user = await requireUser();
+  const id = getIdentity(user.id);
   return (
     <>
       <div className="admin-head">
@@ -28,6 +30,27 @@ export default async function AccountPage() {
           </div>
           <AvatarField initial={user.avatar} />
           <div><button className="btn" type="submit">Simpan profil</button></div>
+        </ActionForm>
+      </section>
+      <section className="admin-section">
+        <h2>Identitas untuk tugas dan lomba</h2>
+        <p className="hint" style={{ marginBottom: 16 }}>Hanya dicetak di PDF yang kamu unduh dari editor. Tidak tampil di situs.</p>
+        <ActionForm action={saveIdentity}>
+          <div className="field">
+            <label htmlFor="full_name">Nama lengkap</label>
+            <input id="full_name" name="full_name" defaultValue={id.full_name} maxLength={80} autoComplete="name" placeholder="Misalnya: Qirani Azzahra" />
+          </div>
+          <div className="form-row">
+            <div className="field">
+              <label htmlFor="school">Sekolah</label>
+              <input id="school" name="school" defaultValue={id.school} maxLength={80} placeholder="Misalnya: SMAN 2 Bogor" />
+            </div>
+            <div className="field">
+              <label htmlFor="region">Provinsi atau kota</label>
+              <input id="region" name="region" defaultValue={id.region} maxLength={60} placeholder="Misalnya: Provinsi Jawa Barat" />
+            </div>
+          </div>
+          <div><button className="btn" type="submit">Simpan identitas</button></div>
         </ActionForm>
       </section>
       <section className="admin-section">

@@ -366,3 +366,44 @@ describe("gambar pratinjau", async () => {
     expect(ogImagePath(base, "qiran")).toMatch(/^\/og\/hujan\.jpg\?v=[0-9a-f]{10}$/);
   });
 });
+
+describe("PDF: identitas dan kolom tulisan", () => {
+  beforeEach(async () => {
+    freshDataDir();
+    (await import("@/lib/db")).resetDbForTests();
+  });
+
+  it("menyimpan identitas dan tidak membocorkannya ke data penulis publik", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const u = await users.createUser({ email: "qirani@contoh.id", name: "Qirani", role: "author", password: PW });
+    users.updateIdentity(u.id, { full_name: " Qirani Azzahra ", school: "SMAN 2 Bogor", region: "Jawa Barat" });
+    expect(users.getIdentity(u.id)).toEqual({ full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Jawa Barat" });
+    users.updateIdentity(u.id, { full_name: "x".repeat(200), school: "", region: "" });
+    expect(users.getIdentity(u.id).full_name.length).toBe(80);
+
+    const p = posts.savePost({ title: "Kemudi", html: "<p>Isi</p>", status: "published", authorId: u.id, tags: [] });
+    const pub = posts.getPublishedBySlug(p.slug)!;
+    for (const k of ["full_name", "school", "region"]) {
+      expect(Object.keys(pub.author!)).not.toContain(k);
+      expect(Object.keys(users.getUser(u.id)!)).not.toContain(k);
+    }
+  });
+
+  it("savePost menyimpan kolom PDF sebagai teks polos", async () => {
+    const users = await import("@/lib/users");
+    const posts = await import("@/lib/posts");
+    const u = await users.createUser({ email: "a@contoh.id", name: "A", role: "author", password: PW });
+    const p = posts.savePost({
+      title: "T", html: "<p>Isi</p>", status: "draft", authorId: u.id, tags: [],
+      pdfLabel: "Artikel <b>Opini</b>", pdfSubtitle: "Sub <i>judul</i>", referencesText: "Satu. https://a.id\nDua.",
+    });
+    expect(p.pdf_label).toBe("Artikel Opini");
+    expect(p.pdf_subtitle).toBe("Sub judul");
+    expect(p.references_text).toBe("Satu. https://a.id\nDua.");
+    // Simpan ulang tanpa field PDF tidak menghapus isinya
+    const again = posts.savePost({ id: p.id, title: "T2", html: "<p>Isi</p>", status: "draft", authorId: u.id, tags: [] });
+    expect(again.pdf_label).toBe("Artikel Opini");
+    expect(again.references_text).toBe("Satu. https://a.id\nDua.");
+  });
+});

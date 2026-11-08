@@ -25,6 +25,9 @@ export type Post = {
   published_at: string | null;
   allow_comments: number;
   author_id: number | null;
+  pdf_label: string;
+  pdf_subtitle: string;
+  references_text: string;
   created_at: string;
   updated_at: string;
 };
@@ -49,6 +52,11 @@ function hydrate(rows: Post[]): PostFull[] {
     tags: tagRows.filter((t) => t.post_id === r.id).map(({ post_id: _, ...t }) => t),
     author: authors.find((a) => a.id === r.author_id) ?? null,
   }));
+}
+
+/** Teks satu baris tanpa HTML, untuk label dan subjudul PDF. */
+function oneLine(v: string, max: number): string {
+  return plainText(sanitize(String(v))).replace(/\s+/g, " ").trim().slice(0, max);
 }
 
 function existingHtml(id?: number): string {
@@ -95,6 +103,9 @@ export type SaveInput = {
   allowComments?: boolean;
   authorId: number;
   tags: string[];
+  pdfLabel?: string;
+  pdfSubtitle?: string;
+  referencesText?: string;
 };
 
 export function savePost(input: SaveInput): Post {
@@ -125,6 +136,9 @@ export function savePost(input: SaveInput): Post {
     published_at: publishedAt,
     allow_comments: input.allowComments === false ? 0 : 1,
     author_id: existing?.author_id ?? input.authorId,
+    pdf_label: oneLine(input.pdfLabel ?? existing?.pdf_label ?? "", 40),
+    pdf_subtitle: oneLine(input.pdfSubtitle ?? existing?.pdf_subtitle ?? "", 160),
+    references_text: (input.referencesText ?? existing?.references_text ?? "").replace(/\r\n?/g, "\n").slice(0, 20000),
     updated_at: now,
   };
 
@@ -133,13 +147,14 @@ export function savePost(input: SaveInput): Post {
     if (existing) {
       db.prepare(`UPDATE posts SET type=@type, title=@title, slug=@slug, excerpt=@excerpt, content_json=@content_json, content_html=@content_html,
         plain_text=@plain_text, feature_image=@feature_image, feature_image_alt=@feature_image_alt, feature_image_caption=@feature_image_caption,
-        status=@status, published_at=@published_at, allow_comments=@allow_comments, updated_at=@updated_at WHERE id=@id`).run({ ...row, id: existing.id });
+        status=@status, published_at=@published_at, allow_comments=@allow_comments, pdf_label=@pdf_label, pdf_subtitle=@pdf_subtitle,
+        references_text=@references_text, updated_at=@updated_at WHERE id=@id`).run({ ...row, id: existing.id });
       postId = existing.id;
     } else {
       const info = db.prepare(`INSERT INTO posts (type, title, slug, excerpt, content_json, content_html, plain_text, feature_image, feature_image_alt,
-        feature_image_caption, status, published_at, allow_comments, author_id, created_at, updated_at)
+        feature_image_caption, status, published_at, allow_comments, author_id, pdf_label, pdf_subtitle, references_text, created_at, updated_at)
         VALUES (@type, @title, @slug, @excerpt, @content_json, @content_html, @plain_text, @feature_image, @feature_image_alt,
-        @feature_image_caption, @status, @published_at, @allow_comments, @author_id, @created_at, @updated_at)`).run({ ...row, created_at: now });
+        @feature_image_caption, @status, @published_at, @allow_comments, @author_id, @pdf_label, @pdf_subtitle, @references_text, @created_at, @updated_at)`).run({ ...row, created_at: now });
       postId = Number(info.lastInsertRowid);
     }
     db.prepare("DELETE FROM post_tags WHERE post_id = ?").run(postId);

@@ -135,6 +135,15 @@ const MIGRATIONS: Migration[] = [
     const upd = db.prepare("UPDATE posts SET feature_image_caption = ? WHERE id = ?");
     for (const r of rows) upd.run(plainText(r.c), r.id);
   },
+  // v3: identitas untuk PDF tugas/lomba (tidak pernah tampil di situs) dan kolom PDF per tulisan
+  `
+  ALTER TABLE users ADD COLUMN full_name TEXT NOT NULL DEFAULT '';
+  ALTER TABLE users ADD COLUMN school TEXT NOT NULL DEFAULT '';
+  ALTER TABLE users ADD COLUMN region TEXT NOT NULL DEFAULT '';
+  ALTER TABLE posts ADD COLUMN pdf_label TEXT NOT NULL DEFAULT '';
+  ALTER TABLE posts ADD COLUMN pdf_subtitle TEXT NOT NULL DEFAULT '';
+  ALTER TABLE posts ADD COLUMN references_text TEXT NOT NULL DEFAULT '';
+  `,
 ];
 
 function migrate(db: DB) {

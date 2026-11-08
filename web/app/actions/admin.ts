@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { authenticate, createUser, deleteUser, getUser, setPassword, setRole, updateProfile, countAdmins, type Role } from "@/lib/users";
+import { authenticate, createUser, deleteUser, getUser, setPassword, setRole, updateProfile, updateIdentity, countAdmins, type Role } from "@/lib/users";
 import { tooManyAttempts, recordFailure, clearFailures } from "@/lib/sessions";
 import { startSession, endSession, requireUser, requireAdmin, clientIp } from "@/lib/auth";
 import { savePost, getPostById, canEdit, deletePost as removePost, updateTag, deleteTag, getAnyBySlug, bulkUpdate, type BulkAction } from "@/lib/posts";
@@ -171,6 +171,16 @@ export async function saveProfile(_prev: FormState, form: FormData): Promise<For
   });
   revalidatePath("/", "layout");
   return { ok: true, message: "Profil disimpan." };
+}
+
+export async function saveIdentity(_prev: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  updateIdentity(user.id, {
+    full_name: String(form.get("full_name") ?? ""),
+    school: String(form.get("school") ?? ""),
+    region: String(form.get("region") ?? ""),
+  });
+  return { ok: true, message: "Identitas tersimpan." };
 }
 
 export async function changePassword(_prev: FormState, form: FormData): Promise<FormState> {

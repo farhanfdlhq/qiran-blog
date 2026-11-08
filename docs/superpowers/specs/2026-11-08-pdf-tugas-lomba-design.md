@@ -1,25 +1,18 @@
 # PDF untuk tugas dan lomba
 
-Status: rancangan, menunggu persetujuan
+Status: disetujui 8 November 2026, dengan revisi format (lihat "Revisi setelah tinjauan")
 Tanggal: 8 November 2026
 
 ## Maksud dan alasan
 
 Qirana dan Qirani sering harus mengirim tulisan ke guru (tugas sekolah) atau ke panitia lomba dalam bentuk berkas A4 yang rapi. Sekarang mereka menata ulang tulisan di Word. Hasilnya rapuh: latar foto dan blok abu-abu rusak saat diekspor, paragraf terpotong, URL terbelah, dan kontras teks rendah (lihat riwayat "Kemudi Nestapa", tiga versi PDF).
 
-Fitur ini membuat setiap tulisan di qiran bisa diunduh dari panel sebagai **PDF A4 dua kolom** yang langsung siap dikirim atau dicetak, dengan satu klik dari HP maupun laptop. Patokan desainnya adalah `Kemudi_Nestapa_Qirani_Azzahra_REVISI.pdf`.
+Fitur ini membuat setiap tulisan di qiran bisa diunduh dari panel sebagai **PDF A4 dua kolom** yang langsung siap dikirim atau dicetak, dengan satu klik dari HP maupun laptop. Patokan tata letaknya adalah karya asli Qirani sebelum didesain ulang (`SMAN2Bogor_KemudiNestapa_PotretFisikdanMentalSopirAngkotdiJantungKotaHujan.pdf`), dengan format wajib: Times New Roman, spasi 1,5, dua kolom.
 
 ## Tujuan
 
 1. Dari editor tulisan di panel, penulis bisa mengunduh PDF A4 dari tulisannya, baik draf, terjadwal, maupun terbit.
-2. Tampilan PDF mengikuti patokan:
-   - **Sampul:** foto penuh dengan lapisan gelap, label jenis tulisan, "SEKOLAH · TAHUN", judul besar, subjudul miring, dan nama penulis beserta sekolah dan provinsi.
-   - **Halaman isi:**
-     - dua kolom dengan header berulang "JUDUL | Jenis · Nama penulis" dan nomor halaman di bawah;
-     - subjudul hijau;
-     - kutipan pembuka dan kutipan tarik;
-     - gambar bernomor dengan keterangan dan sumber.
-   - **Penutup:** Daftar Pustaka dengan baris menjorok, lalu kotak "Disusun oleh".
+2. Tampilan PDF mengikuti karya asli Qirani dengan format Times New Roman, spasi 1,5, dua kolom (detail di "5 (baru)").
 3. Hasilnya sama persis di perangkat apa pun.
 4. Identitas lengkap (nama lengkap, sekolah, provinsi) hanya tercetak di PDF. Tidak pernah tampil di situs publik.
 
@@ -40,7 +33,7 @@ Fitur ini membuat setiap tulisan di qiran bisa diunduh dari panel sebagai **PDF 
 
 - **VPS:** aaPanel, 2 core, RAM 7,75 GB (terpakai sekitar 2,3 GB), Node v24. Aplikasi jalan sebagai user `www` dengan heap Node dibatasi 192 MB.
 - **Stack:** Next.js 16, SQLite, editor Tiptap (HTML disanitasi di server dengan `sanitize-html`).
-- **Font:** harus berlisensi bebas dan disertakan di repo supaya tidak bergantung jaringan. Lora dan Poppins berlisensi OFL.
+- **Font:** Times New Roman tidak boleh disebar ulang, jadi tidak masuk repo. Font ini dipasang di VPS sebagai paket sistem, dengan Liberation Serif (ukuran huruf identik) sebagai cadangan.
 - **Gambar di tulisan:** bisa berasal dari `/uploads/` atau, untuk tulisan hasil impor Ghost, URL luar.
 
 ## Pendekatan yang dipertimbangkan
@@ -58,6 +51,73 @@ Fitur ini membuat setiap tulisan di qiran bisa diunduh dari panel sebagai **PDF 
 - Untuk lomba dan tugas sekolah, dikirim ke guru, dicetak A4.
 - Hanya Qirana dan Qirani (siapa pun yang boleh mengedit tulisan itu) yang bisa mengunduh, dari panel.
 - Pakai pendekatan B.
+
+## Revisi setelah tinjauan (berlaku di atas bagian Rancangan)
+
+Jawaban kakak atas rancangan pertama:
+
+- Format wajib untuk saat ini: **Times New Roman, spasi 1,5, dua kolom**.
+- Patokan tata letak adalah **karya asli Qirani**, bukan versi desain ulang.
+- Warna memakai **palet situs qiran mode terang**.
+- Daftar Pustaka tampil di situs: ya. Nomor gambar di situs: ya.
+- Tidak ada nama atau logo qiran di PDF. Kolom subjudul: ya. Sumber foto sampul: ya. Halaman Tentang tidak punya PDF.
+
+Akibatnya, bagian 5 (Templat PDF) diganti dengan bagian 5 baru di bawah ini.
+
+### 5 (baru). Templat PDF mengikuti karya asli
+
+**Kertas dan margin**
+
+- A4.
+- Margin 4 cm kiri, 4 cm atas, 3 cm kanan, 3 cm bawah. Ini ukuran yang lazim untuk tugas di Indonesia, dan sesuai dengan blok teks di karya asli.
+- Bingkai garis tipis di sekeliling halaman, sekitar 0,8 cm dari tepi kertas, seperti di karya asli. Warnanya tinta qiran `#161c1a`, dengan ketebalan 0,5 pt.
+
+**Huruf dan spasi**
+
+- Times New Roman 12 pt di seluruh dokumen.
+- Spasi 1,5 setara Word ("1.5 lines"), yaitu `line-height` sekitar 1,725.
+- Di server, font dicari berurutan:
+  1. `Times New Roman` (dari paket `ttf-mscorefonts-installer`, dipasang di VPS);
+  2. `Liberation Serif` (ukuran hurufnya identik dengan Times New Roman);
+  3. `serif`.
+- Font tidak dimasukkan ke repo, karena lisensinya tidak mengizinkan.
+
+**Isi**
+
+- Dua kolom dengan jarak 1,27 cm, rata kiri-kanan (`text-align: justify`) dan pemenggalan kata bahasa Indonesia.
+- Paragraf diberi indentasi baris pertama 1,27 cm. Jarak antarparagraf sekitar 6 pt.
+
+**Halaman pertama, tanpa halaman sampul terpisah** (sama seperti karya asli)
+
+- **Label jenis tulisan:** huruf kapital tebal, di tengah, selebar dua kolom.
+- **Judul:** tebal 14 pt, di tengah. Kalau subjudul diisi, dicetak sebagai "Judul: Subjudul", seperti judul asli Qirani. Ringkasan tidak dipakai sebagai cadangan subjudul, karena tidak ada sampul.
+- **Foto sampul:** kalau ada, dicetak sebagai gambar selebar dua kolom di bawah judul (tinggi maksimal sekitar 7 cm), dengan sumber foto kecil miring di bawahnya. Tidak dijadikan latar di belakang teks, karena latar itu yang membuat teks sulit dibaca dan rusak saat diekspor. *Usulan saya.*
+- Setelah itu isi dua kolom dimulai.
+
+**Unsur lain**
+
+- **Subjudul `h2`:** Times New Roman tebal 12 pt, tanpa indentasi. `h3`: tebal miring.
+- **Kutipan (blockquote):** miring, menjorok 0,6 cm, dengan garis kiri warna aksen qiran `#9fc7b8` setebal 2 pt.
+- **Gambar:**
+  - selebar kolom dan tidak boleh terbelah antar halaman;
+  - keterangannya diawali "**Gambar N.**" tebal, lalu keterangan miring dan "(Sumber: …)", warna `#4d5550` (muted qiran);
+  - ukuran keterangan 11 pt dengan spasi 1,15, supaya tidak memakan tempat.
+- **Daftar Pustaka:**
+  - judul "DAFTAR PUSTAKA" huruf kapital, melanjutkan aliran dua kolom seperti karya asli;
+  - tiap sumber menjorok gantung 1,27 cm dan rata kiri (bukan rata kiri-kanan, supaya URL tidak meregang);
+  - tautan berwarna tinta dengan garis bawah aksen `#9fc7b8`, sama seperti di situs.
+- **Penutup:** "Disusun oleh: Nama Lengkap, Sekolah, Provinsi", rata kanan, di akhir aliran teks. Titik koma di karya asli dirapikan jadi titik dua.
+- **Nomor halaman:** kecil di tengah bawah, warna muted, mulai halaman 1. Karya asli tidak punya, tapi lomba biasanya memintanya. *Usulan saya.*
+- **Tidak ada:** header berulang, logo qiran, atau latar berwarna. Kertas putih, supaya hemat tinta saat dicetak.
+- **Warna dari palet situs qiran mode terang:** tinta `#161c1a`, muted `#4d5550`, aksen `#9fc7b8`, dan permukaan `#d6d5cc` untuk garis tipis.
+
+**Teknis**
+
+- Chromium mencetak dengan `page.pdf({ format: "A4", printBackground: true, displayHeaderFooter: true, footerTemplate })`, dengan header kosong dan margin sesuai di atas.
+- Bingkai halaman memakai elemen `position: fixed` yang ikut tercetak di setiap halaman.
+- Karena tidak ada sampul terpisah, `pdf-lib` tidak diperlukan.
+
+Bagian 2 juga berubah: kolom "Subjudul" tidak lagi memakai ringkasan sebagai cadangan.
 
 ## Rancangan
 
@@ -111,41 +171,7 @@ Urutan sumber mengikuti urutan yang diketik. Tidak diurutkan otomatis.
 
 ### 5. Templat PDF
 
-Templatnya berupa halaman HTML khusus cetak yang dirender di server dari data tulisan, lalu diberikan ke Chromium dengan `page.setContent()`. Templat tidak membuka URL situs.
-
-**Kertas dan tata letak**
-
-- A4, dengan margin sekitar 18 mm kiri-kanan, 20 mm atas, dan 22 mm bawah.
-- Isi dua kolom memakai CSS `columns: 2` dengan jarak kolom sekitar 8 mm, rata kiri, dan pemenggalan kata bahasa Indonesia (`hyphens: auto`, `lang="id"`).
-- Header berulang dan nomor halaman dibuat dengan `headerTemplate` dan `footerTemplate` dari Playwright, kecuali di sampul. Caranya, sampul dirender sebagai PDF terpisah tanpa header, lalu digabung dengan `pdf-lib`. Ini *keputusan pembangun* kalau ada cara yang lebih sederhana.
-
-**Gaya, mengikuti patokan**
-
-- Isi memakai Lora 10 sampai 10,5 pt dengan jarak baris sekitar 1,45.
-- Label dan subjudul memakai Poppins.
-- Aksen hijau angkot: garis dan label `#8BC34A`, subjudul `#2E7D32`. *Usulan saya.* Warna ini diambil dari patokan dan berlaku untuk semua tulisan. Tidak ada pilihan warna per tulisan.
-- **Sampul (halaman 1):**
-  - Kalau ada foto sampul: foto memenuhi halaman dengan gradasi gelap dari atas dan bawah.
-  - Kalau tidak ada: latar hijau tua polos.
-  - Kiri atas: label berbentuk pil.
-  - Kanan atas: "SEKOLAH · TAHUN". Tahun diambil dari tanggal terbit, atau dari tahun sekarang untuk draf.
-  - Di atas judul: garis hijau pendek.
-  - Judul: Lora tebal, besar, putih. Ukurannya mengecil otomatis untuk judul panjang.
-  - Subjudul: miring.
-  - Kiri bawah: nama lengkap tebal, dengan "Sekolah · Provinsi" di bawahnya.
-  - Sumber foto: kecil, di sudut kanan bawah.
-- **Kutipan:** blockquote pertama yang muncul sebelum paragraf mana pun jadi kutipan pembuka selebar dua kolom, dengan garis hijau di kiri. Blockquote lain jadi kutipan tarik di dalam kolom, dengan garis atas hijau dan garis bawah tipis.
-- **Subjudul isi:** `h2` memakai Poppins tebal hijau, dengan garis pendek di atasnya. `h3` memakai Lora tebal.
-- **Gambar:** selebar kolom, tidak boleh terbelah antar halaman (`break-inside: avoid`). Keterangannya "Gambar N." tebal hijau, diikuti teks miring abu-abu.
-- **Aturan pemisah:** subjudul tidak boleh tertinggal di dasar kolom (`break-after: avoid`). Minimal 2 baris paragraf di awal dan akhir kolom (`orphans` dan `widows`).
-- **Penutup:** Daftar Pustaka, lalu kotak "DISUSUN OLEH" dengan nama lengkap, sekolah, dan provinsi.
-- **Tanda qiran:** tidak ada logo atau nama qiran di PDF, karena berkas ini atas nama penulis untuk guru atau panitia. *Usulan saya.*
-
-**Font:** Lora dan Poppins (OFL) disertakan di `web/assets/fonts/pdf/` lengkap dengan berkas lisensinya, lalu dimuat lewat `@font-face` dengan URL `file://` atau data URI.
-
-**Gambar:** gambar dari `/uploads/` dibaca langsung dari disk. Varian `-w1400` dipakai kalau ada, supaya PDF tidak terlalu besar. Gambar dari URL luar tidak diambil, dan diganti kotak bertuliskan "Gambar tidak tersedia di PDF". Semua permintaan jaringan dari Chromium diblokir kecuali `data:` dan `file:` untuk folder font dan uploads. Ini mencegah SSRF dan menjaga hasil tetap sama.
-
-**Nama berkas:** `Judul_Nama_Lengkap.pdf`, berupa slug dari judul dan nama lengkap (atau nama tampilan) dengan garis bawah, contohnya `Kemudi_Nestapa_Qirani_Azzahra.pdf`.
+Lihat "5 (baru)" di bagian Revisi di atas. Templat versi desain ulang (sampul berfoto, Lora dan Poppins, hijau angkot) dibatalkan.
 
 ### 6. Rute dan keamanan
 
@@ -162,7 +188,8 @@ Templatnya berupa halaman HTML khusus cetak yang dirender di server dari data tu
 
 ### 7. Pemasangan di VPS
 
-- Dependensi baru: `playwright-core` (tanpa unduhan browser otomatis) dan `pdf-lib` (kalau dipakai untuk menggabung sampul).
+- Dependensi baru: `playwright-core` (tanpa unduhan browser otomatis).
+- Font Times New Roman dipasang di VPS dengan `apt install ttf-mscorefonts-installer`, dan Liberation Serif dengan `fonts-liberation` sebagai cadangan.
 - Chromium dipasang sekali sebagai root:
   - perintahnya `PLAYWRIGHT_BROWSERS_PATH=/opt/qiran-blog/data/ms-playwright npx playwright install --with-deps chromium`;
   - folder itu diberikan ke `www`;
@@ -196,13 +223,11 @@ Templatnya berupa halaman HTML khusus cetak yang dirender di server dari data tu
 - **Hanya tulisan (`type = post`) yang punya PDF.** Halaman Tentang tidak punya. *Usulan saya.*
 - **Identitas yang dicetak selalu milik penulis tulisan itu**, bukan milik siapa pun yang menekan tombol. Admin yang mengunduh tulisan Qirani tetap mendapat PDF atas nama Qirani.
 - **Nomor "Gambar N." hanya untuk gambar baru yang dibuat dengan node figure qiran.** Penandanya kelas `qiran-fig`. Figure lama hasil impor Ghost (`kg-image-card`) tidak diberi nomor, supaya tampilan tulisan lama di situs tidak berubah. *Usulan saya.*
-- **Subjudul sampul dari ringkasan** dipotong rapi di batas kata, maksimal sekitar 140 karakter.
 - **Sistem operasi VPS** perlu dicek saat pemasangan, karena `--with-deps` butuh apt (Ubuntu atau Debian). Kalau ternyata bukan, langkah pemasangan menyebut paket yang dibutuhkan secara manual.
 - **Chromium berjalan sebagai user `www`**, dengan `HOME` dan folder sementara yang bisa ditulis. Folder sementaranya di dalam `DATA_DIR/cache/chromium`.
 
 ## Diserahkan ke pembangun
 
-- Cara teknis penggabungan sampul dengan halaman isi (pdf-lib atau satu dokumen dengan aturan `@page :first`), asalkan sampul tanpa header dan nomor halaman.
-- Ukuran font dan jarak yang tepat, asalkan hasil akhirnya setara dengan patokan.
+- Jarak kecil (antarparagraf, sekitar gambar, sekitar judul), asalkan tetap setara dengan karya asli.
 - Bentuk antrean render.
 - Detail node Tiptap untuk figure.
