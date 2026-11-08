@@ -603,3 +603,18 @@ describe("Daftar Pustaka tersimpan dari sumber terstruktur", () => {
     expect(textToSources("Satu.\n\nDua.").map((s) => s.text)).toEqual(["Dua.", "Satu."]);
   });
 });
+
+describe("PDF: kutipan pembuka", async () => {
+  const { pdfHtml } = await import("@/lib/pdf/template");
+  it("kutipan di awal tulisan dan paragraf sesudahnya keluar dari kolom", () => {
+    const post = { id: 1, type: "post", title: "T", slug: "t", excerpt: "", content_json: null, plain_text: "x",
+      content_html: "<blockquote><p>“Tanya?”</p></blockquote><p>Pengantar.</p><p>Isi.</p><blockquote><p>Kutipan tengah</p></blockquote>",
+      feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null, allow_comments: 1, author_id: 1,
+      pdf_label: "", pdf_subtitle: "", references_text: "", references_json: "", pdf_cover: 0, created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
+    const html = pdfHtml(post, { full_name: "", school: "", region: "" }, "Q", { uploadsDir: "/x" });
+    const cols = html.slice(html.indexOf('<div class="cols">'));
+    expect(html).toContain('<div class="opener"><blockquote><p>“Tanya?”</p></blockquote><p class="lead">Pengantar.</p></div>');
+    expect(cols).not.toContain("Tanya?");
+    expect(cols).toContain("Kutipan tengah");
+  });
+});

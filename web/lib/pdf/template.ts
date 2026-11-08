@@ -13,7 +13,7 @@ import { numberFigures } from "../figures";
 import { referencesHtml } from "../references";
 
 /** Naikkan kalau tampilan templat berubah, supaya PDF lama di cache dibuat ulang. */
-export const TEMPLATE_VERSION = "7";
+export const TEMPLATE_VERSION = "8";
 
 const C = { ink: "#161c1a", muted: "#4d5550", accent: "#9fc7b8", surface: "#d6d5cc" };
 
@@ -55,7 +55,11 @@ export function pdfHtml(post: PostFull, identity: Identity, authorName: string, 
   const byline = [name, identity.school, identity.region].map((s) => s.trim()).filter(Boolean).join(", ");
   // Kalau halaman sampul berfoto dipakai, foto yang sama tidak diulang di halaman isi
   const cover = post.feature_image && !post.pdf_cover ? localImage(post.feature_image, opts.uploadsDir) : null;
-  const body = inlineImages(numberFigures(post.content_html), opts.uploadsDir);
+  const full = inlineImages(numberFigures(post.content_html), opts.uploadsDir);
+  // Kutipan di awal tulisan (beserta paragraf sesudahnya) jadi pembuka selebar halaman, seperti versi revisi
+  const open = /^\s*(<blockquote>[\s\S]*?<\/blockquote>)\s*(<p>[\s\S]*?<\/p>)?/.exec(full);
+  const opener = open ? `<div class="opener">${open[1]}${open[2] ? open[2].replace(/^<p>/, '<p class="lead">') : ""}</div>` : "";
+  const body = open ? full.slice(open[0].length) : full;
   const refs = referencesHtml(post.references_text);
 
   return `<!doctype html>
@@ -82,8 +86,14 @@ h1 { margin: 0 0 16pt; text-align: center; font-size: 14pt; line-height: 1.4; fo
 .cols p { margin: 0 0 6pt; text-indent: 1.27cm; text-align: justify; hyphens: auto; orphans: 2; widows: 2; }
 .cols h2, .cols h3, .cols h4 { margin: 10pt 0 4pt; font-size: 12pt; line-height: 1.4; break-after: avoid; }
 .cols h3, .cols h4 { font-style: italic; }
-.cols blockquote { margin: 6pt 0 8pt 0.6cm; padding-left: 8pt; border-left: 2pt solid ${C.accent}; font-style: italic; }
-.cols blockquote p { text-indent: 0; text-align: left; }
+/* Pembuka: kutipan besar dengan garis aksen di tepi kiri tulisan, lalu pengantar */
+.opener { margin: 0 0 14pt; break-inside: avoid; }
+.opener blockquote { margin: 0; padding: 1pt 0 1pt 10pt; border-left: 3pt solid ${C.accent}; font-style: italic; font-size: 13pt; line-height: 1.5; }
+.opener blockquote p { margin: 0; text-indent: 0; text-align: left; }
+.opener .lead { margin: 6pt 0 0; padding-left: 13pt; text-indent: 0; text-align: justify; color: ${C.muted}; }
+/* Kutipan di dalam kolom: rata dengan tepi kolom, garis aksen di atas dan garis tipis di bawah */
+.cols blockquote { margin: 8pt 0 10pt; padding: 6pt 0 7pt; border-top: 2pt solid ${C.accent}; border-bottom: 0.5pt solid ${C.surface}; font-style: italic; font-weight: bold; line-height: 1.5; break-inside: avoid; }
+.cols blockquote p { margin: 0; text-indent: 0; text-align: left; }
 .cols ul, .cols ol { margin: 0 0 6pt; padding-left: 1.27cm; }
 .cols li { text-align: justify; }
 .cols mark { background: ${C.accent}; color: inherit; }
@@ -109,6 +119,7 @@ h1 { margin: 0 0 16pt; text-align: center; font-size: 14pt; line-height: 1.4; fo
 ${label ? `<p class="label">${esc(label)}</p>` : ""}
 <h1>${esc(title)}</h1>
 ${cover ? `<figure class="cover"><img src="${cover}" alt="">${post.feature_image_caption ? `<figcaption>${esc(post.feature_image_caption)}</figcaption>` : ""}</figure>` : ""}
+${opener}
 <div class="cols">
 ${body}
 ${!refs && byline ? `<p class="byline">Disusun oleh: ${esc(byline)}</p>` : ""}
