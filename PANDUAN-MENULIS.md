@@ -34,8 +34,12 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 
 ### Gambar
 
-- **Gambar sampul:** klik **Tambah gambar sampul** di atas judul. Gambar ini tampil besar di atas tulisan, dan di beranda kalau tulisannya jadi yang terbaru.
-- **Gambar di dalam tulisan:** klik **Gambar** di toolbar. Setelah memilih gambar, isi teks alternatif (gambaran singkat isinya) supaya pembaca yang memakai pembaca layar tetap tahu isinya.
+- **Gambar sampul:** klik **Tambah gambar sampul** di atas judul. Gambar ini tampil besar di atas tulisan, dan di beranda kalau tulisannya jadi yang terbaru. Isi **Sumber foto** di kolom kanan, terutama untuk lomba.
+- **Gambar di dalam tulisan:** klik **Gambar** di toolbar. Setelah memilih gambar, isi:
+  - **Keterangan**, misalnya "Balai Kota Bogor dipadati sopir angkot". Gambar berketerangan otomatis diberi nomor: Gambar 1, Gambar 2, dan seterusnya.
+  - **Sumber**, misalnya "RMOL, 23 Januari 2026". Tertulis sebagai (Sumber: …). Wajib kalau gambar bukan milikmu.
+  - **Teks alternatif**, yaitu gambaran singkat isinya untuk pembaca yang memakai pembaca layar.
+- Klik dua kali pada gambar untuk mengubah keterangan dan sumbernya.
 - Foto dari HP langsung bisa dipakai. Ukurannya otomatis diperkecil dan data lokasi di dalam foto dibuang.
 
 ## Pengaturan di kolom kanan
@@ -49,6 +53,42 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 Klik **Pratinjau** untuk melihat tampilan tulisan seperti yang akan dilihat pembaca. Kalau ada perubahan yang belum tersimpan, perubahan disimpan dulu otomatis.
 
 Kalau pindah halaman sebelum tersimpan, akan muncul pertanyaan: simpan dulu, pindah tanpa menyimpan, atau tetap di halaman.
+
+## PDF untuk tugas dan lomba
+
+Setiap tulisan bisa diunduh sebagai PDF A4 yang siap dikirim ke guru atau panitia: Times New Roman 12, spasi 1,5, dua kolom, dengan bingkai dan nomor halaman. Daftar Pustaka selalu di lembar terpisah. Draf juga bisa, jadi tidak perlu diterbitkan dulu.
+
+1. Sekali saja: buka **Akun saya → Identitas untuk tugas dan lomba**, isi nama lengkap, sekolah, dan provinsi. Data ini hanya dicetak di PDF, tidak tampil di situs.
+2. Di kolom kanan editor, bagian **PDF untuk tugas dan lomba**:
+   - **Label jenis tulisan**, misalnya "Artikel Opini". Kalau kosong, dipakai tag pertama.
+   - **Subjudul**, misalnya "Potret Fisik dan Mental Sopir Angkot di Jantung Kota Hujan". Dicetak setelah judul: "Kemudi Nestapa: Potret Fisik…".
+3. Klik **Unduh PDF**. Kalau ada perubahan yang belum tersimpan, disimpan dulu otomatis. Berkasnya bernama `Judul_Nama_Lengkap.pdf`.
+
+Kalau panitia minta format lain (misalnya satu kolom atau spasi 2), bilang ke kakak.
+
+## Daftar Pustaka
+
+Tulis di kolom **Daftar Pustaka** di kanan editor, satu sumber per baris. Urutan abjad diatur otomatis. Daftar ini tampil di akhir tulisan di situs, dan di lembar terpisah di PDF, dengan baris kedua dan seterusnya menjorok 1,27 cm.
+
+Pakai gaya **APA edisi 7**, yang paling umum diterima sekolah dan lomba (kecuali panitia menyebut gaya lain). Apit judul dengan bintang supaya miring: `*Judul*`.
+
+| Jenis sumber | Contoh |
+| --- | --- |
+| Berita daring | `Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/...` |
+| Halaman lembaga | `World Health Organization. (2026, 15 September). *Mental health at work*. https://www.who.int/...` |
+| Halaman tanpa tanggal | `U.S. Food and Drug Administration. (t.t.). *Keep your air clear: How tobacco can harm your lungs*. Diakses 8 November 2026, dari https://www.fda.gov/...` |
+| Foto | `Nama Fotografer. (2021, 2 November). *Uji coba Biskita Trans Pakuan Kota Bogor* [Foto]. ANTARA Foto. https://...` |
+| Buku | `Hirata, A. (2005). *Laskar pelangi*. Bentang Pustaka.` |
+
+Aturan yang sering terlewat:
+
+- Nama belakang dulu, lalu inisial: `Nugroho, A.`
+- Nama bulan dalam bahasa Indonesia, karena tulisannya berbahasa Indonesia: `(2026, 23 Januari)`.
+- Tanpa tanggal ditulis `(t.t.)`, ditambah tanggal kamu membukanya: `Diakses 8 November 2026, dari …`.
+- Kalau penulis dan nama situsnya sama (misalnya WHO di situs WHO), nama situs tidak perlu ditulis lagi.
+- Judul berita dan halaman web dimiringkan. Nama media (RMOL, detikNews) tidak.
+- Setiap sumber di Daftar Pustaka harus disebut di dalam tulisan, misalnya "(Nugroho, 2026)" atau "menurut WHO (2026)". Sebaliknya, setiap yang dikutip harus ada di daftar.
+- Buka lagi setiap tautan sebelum mengirim, untuk memastikan tidak salah salin.
 
 ## Menerbitkan
 

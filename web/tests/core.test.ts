@@ -421,6 +421,10 @@ describe("PDF: Daftar Pustaka dan nomor gambar", async () => {
     expect(html).toContain("</a>.");
     expect(html).toContain("&lt;b&gt;B&lt;/b&gt; &amp; C");
     expect(referencesHtml("  \n\n")).toBe("");
+    // Diurutkan sesuai abjad, mengabaikan bintang dan huruf besar
+    const sorted = referencesHtml("World Health Organization. (2026).\n*Antara* Foto. (2021).\nbekata, E. (2026).");
+    expect(sorted.indexOf("Antara")).toBeLessThan(sorted.indexOf("bekata"));
+    expect(sorted.indexOf("bekata")).toBeLessThan(sorted.indexOf("World"));
     expect(referencesHtml('javascript:alert(1) "x"')).not.toContain("<a");
   });
 

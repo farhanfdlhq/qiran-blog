@@ -160,6 +160,13 @@ elif [ "$RESTART" = "0" ]; then
     if id www >/dev/null 2>&1 && [ -n "${DATA_DIR_VALUE:-}" ]; then chown -R www:www "$DATA_DIR_VALUE" 2>/dev/null || true; fi
     echo ""
     echo "Selesai. Versi baru sudah jalan di port ${PORT}."
+    # Pembuat PDF tugas dan lomba butuh Chromium (dipasang sekali, lihat docs/PINDAH-KE-NEXTJS.md bagian 11)
+    PW_PATH="$(grep -E '^PLAYWRIGHT_BROWSERS_PATH=' .env.production 2>/dev/null | cut -d= -f2- || true)"
+    if [ -z "$PW_PATH" ] || ! ls -d "$PW_PATH"/chromium_headless_shell-* >/dev/null 2>&1; then
+      echo ""
+      echo "Catatan: Chromium untuk fitur PDF belum terpasang. Tombol 'Unduh PDF' belum bisa dipakai."
+      echo "Lihat docs/PINDAH-KE-NEXTJS.md bagian 11 untuk memasangnya (sekali saja)."
+    fi
   else
     echo "" >&2
     echo "Situs tidak menjawab setelah restart. Kembali ke versi sebelumnya..." >&2

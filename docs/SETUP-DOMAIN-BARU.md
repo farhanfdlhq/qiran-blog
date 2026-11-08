@@ -141,6 +141,8 @@ Cek bahwa aplikasi sudah jalan:
 curl -s http://127.0.0.1:[PORT]/ | grep -o "<title>[^<]*"
 ```
 
+**Pembuat PDF** (tombol Unduh PDF untuk tugas dan lomba): ikuti bagian 11 di `docs/PINDAH-KE-NEXTJS.md`, dengan `/opt/qiran-blog` diganti `/opt/[NAMA]-blog`. Font dan paket sistem cukup dipasang sekali per VPS. Chromium dipasang per blog di folder datanya masing-masing.
+
 ## 5. Proxy Project dan SSL
 
 **Buat Proxy Project:** **Website → Proxy Project → Add**

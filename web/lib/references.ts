@@ -22,8 +22,15 @@ function line(text: string): string {
   return out + inline(text.slice(last));
 }
 
+/** Kunci urut: tanpa tanda bintang, tanda baca di awal, dan aksen. */
+function sortKey(line: string): string {
+  return line.replace(/\*/g, "").replace(/^[^A-Za-z0-9\u00C0-\u024F]+/, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/** Sumber per baris, diurutkan sesuai abjad nama penulis seperti aturan APA. */
 export function referenceLines(text: string): string[] {
-  return String(text ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = String(text ?? "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  return lines.sort((a, b) => sortKey(a).localeCompare(sortKey(b), "id"));
 }
 
 /** Isi <li> untuk setiap sumber. Kosong kalau tidak ada sumber. */

@@ -436,7 +436,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
               <label htmlFor="refs">Daftar Pustaka</label>
               <textarea id="refs" value={referencesText} maxLength={20000} onChange={(e) => touch(setReferencesText)(e.target.value)}
                 aria-describedby="refs-hint" style={{ minHeight: 140 }} placeholder={"Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/…"} />
-              <p className="hint" id="refs-hint">Satu sumber per baris. Apit judul dengan *bintang* supaya miring. Tampil di akhir tulisan dan di PDF.</p>
+              <p className="hint" id="refs-hint">Satu sumber per baris, gaya APA 7. Apit judul dengan *bintang* supaya miring. Urutan abjad diatur otomatis. Tampil di akhir tulisan dan di PDF.</p>
             </div>
           ) : null}
           {!isPage ? (

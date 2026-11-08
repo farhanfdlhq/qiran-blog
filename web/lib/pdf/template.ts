@@ -13,7 +13,7 @@ import { numberFigures } from "../figures";
 import { referencesHtml } from "../references";
 
 /** Naikkan kalau tampilan templat berubah, supaya PDF lama di cache dibuat ulang. */
-export const TEMPLATE_VERSION = "4";
+export const TEMPLATE_VERSION = "5";
 
 const C = { ink: "#161c1a", muted: "#4d5550", accent: "#9fc7b8", surface: "#d6d5cc" };
 

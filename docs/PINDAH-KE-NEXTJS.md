@@ -169,6 +169,62 @@ Satu perintah ini mengerjakan semuanya:
 
 Kalau skrip tidak menemukan cara restart otomatis, skrip memberi tahu, dan kamu cukup klik **Restart** pada project `qiran` di aaPanel.
 
+## 11. Pasang pembuat PDF (sekali saja)
+
+Tombol **Unduh PDF** di editor membuat PDF A4 (Times New Roman, spasi 1,5, dua kolom) untuk tugas dan lomba. Server butuh dua hal: font Times New Roman dan Chromium tanpa layar (sekitar 300 MB disk). Jalankan sebagai root di Terminal aaPanel, berurutan.
+
+**a. Ambil kode terbaru dulu** (sekaligus memasang paket baru):
+
+```bash
+cd /opt/qiran-blog/web && ./scripts/deploy.sh
+```
+
+Di akhir akan muncul catatan "Chromium untuk fitur PDF belum terpasang". Itu normal sebelum langkah berikutnya.
+
+**b. Cek sistem operasi VPS:**
+
+```bash
+grep -E '^(NAME|VERSION)=' /etc/os-release
+```
+
+Kalau hasilnya Ubuntu, aktifkan repositori multiverse dulu (tempat paket font Microsoft):
+
+```bash
+add-apt-repository -y multiverse
+```
+
+Kalau Debian, lewati langkah ini.
+
+**c. Pasang font Times New Roman** (dan Liberation Serif sebagai cadangan yang ukurannya identik):
+
+```bash
+echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections && apt-get update && apt-get install -y fontconfig fonts-liberation ttf-mscorefonts-installer
+```
+
+Cek hasilnya:
+
+```bash
+fc-list | grep -iE "Times New Roman|Liberation Serif" | head -3
+```
+
+Kalau Times New Roman tidak muncul tapi Liberation Serif ada, PDF tetap jalan dengan Liberation Serif, yang bentuk dan ukurannya sama dengan Times New Roman.
+
+**d. Pasang Chromium:**
+
+```bash
+export PATH=/www/server/nodejs/v24.13.0/bin:$PATH && cd /opt/qiran-blog/web && PLAYWRIGHT_BROWSERS_PATH=/opt/qiran-blog/data/ms-playwright npx playwright-core install --with-deps --only-shell chromium && chown -R www:www /opt/qiran-blog/data/ms-playwright
+```
+
+**e. Beri tahu aplikasi letak Chromium**, lalu restart:
+
+```bash
+cd /opt/qiran-blog/web && (grep -q '^PLAYWRIGHT_BROWSERS_PATH=' .env.production || echo 'PLAYWRIGHT_BROWSERS_PATH=/opt/qiran-blog/data/ms-playwright' >> .env.production) && ./scripts/deploy.sh
+```
+
+Kali ini catatan Chromium tidak muncul lagi.
+
+**f. Coba:** buka satu tulisan di panel, isi **Akun saya → Identitas untuk tugas dan lomba**, lalu klik **Unduh PDF** di kolom kanan editor.
+
 ---
 
 ## Kalau ada masalah
@@ -180,4 +236,6 @@ Kalau skrip tidak menemukan cara restart otomatis, skrip memberi tahu, dan kamu 
 | Upload gambar gagal | Folder `DATA_DIR` harus bisa ditulis oleh user yang menjalankan project. |
 | Pratinjau WhatsApp/Facebook memakai gambar umum, bukan kartu tulisan | Server perlu bisa mengunduh font dari `api.fontshare.com` sekali (disimpan di `DATA_DIR/cache/fonts`). Lihat log project untuk baris `[og]`. |
 | Pratinjau di WhatsApp masih versi lama | WhatsApp menyimpan pratinjau. Tes dengan menambah `?v=2` di ujung tautan, atau perbarui lewat [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) (klik **Scrape Again**). |
+| "PDF belum bisa dibuat di server ini" | Chromium belum terpasang atau baris `PLAYWRIGHT_BROWSERS_PATH` belum ada di `.env.production`. Ulangi bagian 11 langkah d dan e. |
+| PDF memakai huruf yang bukan Times New Roman | Paket font belum terpasang. Ulangi bagian 11 langkah b dan c, lalu restart. PDF lama dibuat ulang otomatis kalau tulisannya diubah. |
 | Gambar lama dari Ghost tidak muncul | Jalankan ulang impor dengan argumen folder konten Ghost (`/opt/qiran-blog/data/ghost`). |
