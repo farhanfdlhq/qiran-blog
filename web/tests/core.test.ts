@@ -441,3 +441,74 @@ describe("PDF: Daftar Pustaka dan nomor gambar", async () => {
     expect(out).not.toContain("fig-num");
   });
 });
+
+describe("PDF: templat", async () => {
+  const { pdfHtml, pdfFileName, pdfCacheKey } = await import("@/lib/pdf/template");
+  type P = Parameters<typeof pdfHtml>[0];
+  const base = (over: Partial<P> = {}): P => ({
+    id: 1, type: "post", title: "Kemudi Nestapa", slug: "kemudi", excerpt: "", content_json: null,
+    content_html: '<p>Isi pertama.</p><figure class="qiran-fig"><img src="https://luar.example/x.jpg" alt=""><figcaption><span class="fig-caption">Demo</span> <span class="fig-source">(Sumber: RMOL)</span></figcaption></figure>',
+    plain_text: "Isi pertama.", feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null,
+    allow_comments: 1, author_id: 1, pdf_label: "Artikel Opini", pdf_subtitle: "Potret Sopir Angkot", references_text: "A. (2026). *Judul*. https://a.id",
+    created_at: "2026-11-08T00:00:00.000Z", updated_at: "2026-11-08T00:00:00.000Z", tags: [], author: null, ...over,
+  } as P);
+  const id = { full_name: "Qirani Azzahra", school: "SMAN 2 Bogor", region: "Provinsi Jawa Barat" };
+  const opts = { uploadsDir: "/tidak-ada" };
+
+  it("memuat label, judul dengan subjudul, gambar bernomor, pustaka, dan identitas", () => {
+    const html = pdfHtml(base(), id, "Qirani", opts);
+    expect(html).toContain(">Artikel Opini<");
+    expect(html).toContain("Kemudi Nestapa: Potret Sopir Angkot");
+    expect(html).toContain("Gambar 1.");
+    expect(html).toContain("<em>Judul</em>");
+    expect(html).toContain("Disusun oleh: Qirani Azzahra, SMAN 2 Bogor, Provinsi Jawa Barat");
+    expect(html).not.toContain("qiran.my.id");
+  });
+
+  it("gambar dari luar tidak diambil, dan identitas kosong tidak meninggalkan koma", () => {
+    const html = pdfHtml(base(), { full_name: "", school: "", region: "" }, "Qirani", opts);
+    expect(html).not.toContain("luar.example");
+    expect(html).toContain("Gambar tidak tersedia di PDF");
+    expect(html).toContain("Disusun oleh: Qirani</p>");
+  });
+
+  it("judul dan label di-escape", () => {
+    const html = pdfHtml(base({ title: 'A <script>alert(1)</script> & "B"', pdf_label: "<b>x</b>", pdf_subtitle: "" }), id, "Q", opts);
+    expect(html).not.toContain("<script>alert");
+    expect(html).toContain("A &lt;script&gt;");
+    expect(html).toContain("&lt;b&gt;x&lt;/b&gt;");
+  });
+
+  it("label kosong memakai tag pertama", () => {
+    const html = pdfHtml(base({ pdf_label: "", tags: [{ id: 1, name: "Opini", slug: "opini", description: "" }] }), id, "Q", opts);
+    expect(html).toContain(">Opini<");
+  });
+
+  it("nama berkas dan kunci cache", () => {
+    expect(pdfFileName("Kemudi Nestapa", "Qirani Azzahra")).toBe("Kemudi_Nestapa_Qirani_Azzahra.pdf");
+    expect(pdfFileName("Apa?! Ini: tes/1", "Q")).toBe("Apa_Ini_tes_1_Q.pdf");
+    expect(pdfFileName("", "")).toBe("Tulisan.pdf");
+    const k1 = pdfCacheKey(base(), id, "Qirani");
+    expect(pdfCacheKey(base(), id, "Qirani")).toBe(k1);
+    expect(pdfCacheKey(base(), { ...id, full_name: "Qirani A." }, "Qirani")).not.toBe(k1);
+    expect(pdfCacheKey(base({ content_html: "<p>Lain</p>" }), id, "Qirani")).not.toBe(k1);
+  });
+});
+
+describe("PDF: Daftar Pustaka di lembar sendiri", async () => {
+  const { pdfHtml } = await import("@/lib/pdf/template");
+  it("pustaka berada di luar kolom isi dan dimulai di halaman baru", () => {
+    const post = { id: 1, type: "post", title: "T", slug: "t", excerpt: "", content_json: null, content_html: "<p>Isi.</p>", plain_text: "Isi.",
+      feature_image: "", feature_image_alt: "", feature_image_caption: "", status: "draft", published_at: null, allow_comments: 1, author_id: 1,
+      pdf_label: "", pdf_subtitle: "", references_text: "Satu sumber.", created_at: "", updated_at: "", tags: [], author: null } as Parameters<typeof pdfHtml>[0];
+    const html = pdfHtml(post, { full_name: "Q", school: "", region: "" }, "Q", { uploadsDir: "/x" });
+    const cols = html.slice(html.indexOf('<div class="cols">'), html.indexOf("</div>", html.indexOf('<div class="cols">')));
+    expect(cols).not.toContain("Daftar Pustaka");
+    expect(html).toContain('<section class="refs-page">');
+    expect(html).toMatch(/\.refs-page \{ break-before: page; \}/);
+    // Tanpa pustaka, "Disusun oleh" tetap di akhir isi
+    const tanpa = pdfHtml({ ...post, references_text: "" }, { full_name: "Q", school: "", region: "" }, "Q", { uploadsDir: "/x" });
+    expect(tanpa).not.toContain("refs-page\">");
+    expect(tanpa).toContain("Disusun oleh: Q");
+  });
+});

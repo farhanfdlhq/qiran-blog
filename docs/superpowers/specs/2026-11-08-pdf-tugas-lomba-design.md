@@ -102,12 +102,13 @@ Akibatnya, bagian 5 (Templat PDF) diganti dengan bagian 5 baru di bawah ini.
   - selebar kolom dan tidak boleh terbelah antar halaman;
   - keterangannya diawali "**Gambar N.**" tebal, lalu keterangan miring dan "(Sumber: …)", warna `#4d5550` (muted qiran);
   - ukuran keterangan 11 pt dengan spasi 1,15, supaya tidak memakan tempat.
-- **Daftar Pustaka:**
-  - judul "DAFTAR PUSTAKA" huruf kapital, melanjutkan aliran dua kolom seperti karya asli;
+- **Daftar Pustaka (revisi 8 November):**
+  - selalu dimulai di **lembar baru**, seperti dokumen akademis, atas permintaan kakak;
+  - satu kolom penuh, dengan judul "DAFTAR PUSTAKA" huruf kapital tebal di tengah;
   - tiap sumber menjorok gantung 1,27 cm dan rata kiri (bukan rata kiri-kanan, supaya URL tidak meregang);
   - tautan berwarna tinta dengan garis bawah aksen `#9fc7b8`, sama seperti di situs.
-- **Penutup:** "Disusun oleh: Nama Lengkap, Sekolah, Provinsi", rata kanan, di akhir aliran teks. Titik koma di karya asli dirapikan jadi titik dua.
-- **Nomor halaman:** kecil di tengah bawah, warna muted, mulai halaman 1. Karya asli tidak punya, tapi lomba biasanya memintanya. *Usulan saya.*
+- **Penutup:** "Disusun oleh: Nama Lengkap, Sekolah, Provinsi", rata kanan, setelah Daftar Pustaka (urutan sama dengan karya asli). Kalau tidak ada pustaka, letaknya di akhir isi. Titik koma di karya asli dirapikan jadi titik dua.
+- **Nomor halaman dan bingkai** digambar dengan pdf-lib setelah Chromium selesai, karena bingkai dari CSS terpotong. Nomor halaman kecil di tengah bawah di dalam bingkai, warna muted, mulai halaman 1. Karya asli tidak punya, tapi lomba biasanya memintanya. *Usulan saya.*
 - **Tidak ada:** header berulang, logo qiran, atau latar berwarna. Kertas putih, supaya hemat tinta saat dicetak.
 - **Warna dari palet situs qiran mode terang:** tinta `#161c1a`, muted `#4d5550`, aksen `#9fc7b8`, dan permukaan `#d6d5cc` untuk garis tipis.
 

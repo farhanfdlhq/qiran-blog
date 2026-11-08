@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Alamat sama dengan Ghost lama (/judul-tulisan/), jadi tautan lama tetap jalan
   trailingSlash: true,
-  serverExternalPackages: ["better-sqlite3", "sharp"],
+  serverExternalPackages: ["better-sqlite3", "sharp", "playwright-core", "pdf-lib"],
   poweredByHeader: false,
   images: { unoptimized: true },
   experimental: {

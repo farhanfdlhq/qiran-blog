@@ -223,6 +223,35 @@ try {
   const up3 = await adm.request.post(BASE + "/api/upload/", { multipart: { file: { name: "a.php", mimeType: "image/png", buffer: Buffer.from("<?php echo 1;") } } });
   check("file bukan gambar ditolak", up3.status() === 422);
 
+  // 11d. PDF tugas dan lomba
+  await page.goto(BASE + "/admin/akun/");
+  await page.fill("#full_name", "Qirani Nama Lengkap Uji");
+  await page.fill("#school", "SMA Uji Coba");
+  await page.fill("#region", "Provinsi Uji");
+  await page.click("button:has-text('Simpan identitas')");
+  await page.waitForSelector(".toast:has-text('Identitas tersimpan.')", { timeout: 10000 });
+  const fetchIn = (pg, url) => pg.evaluate(async (u) => {
+    const r = await fetch(u);
+    const b = new Uint8Array(await r.arrayBuffer());
+    return { status: r.status, type: r.headers.get("content-type"), size: b.length, head: String.fromCharCode(...b.slice(0, 5)), disp: r.headers.get("content-disposition") };
+  }, url);
+  const postId = editUrl.match(/tulisan\/(\d+)\//)[1];
+  await page.goto(editUrl);
+  await page.waitForSelector(".prose");
+  const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }), page.click("button:has-text('Unduh PDF')")]);
+  check("tombol Unduh PDF mengunduh berkas", dl.suggestedFilename() === "Uji_coba_dari_editor_baru_Qirani_Nama_Lengkap_Uji.pdf", dl.suggestedFilename());
+  const own = await fetchIn(page, `/admin/pdf/${postId}/`);
+  check("PDF A4 dari panel", own.status === 200 && own.type === "application/pdf" && own.head === "%PDF-" && own.size > 5000 && own.size < 5_000_000, JSON.stringify(own));
+  const otherId = otherHref.match(/tulisan\/(\d+)\//)[1];
+  check("penulis tidak bisa mengunduh PDF tulisan orang lain", (await fetchIn(page, `/admin/pdf/${otherId}/`)).status === 404);
+  check("pengunjung tidak bisa mengunduh PDF", (await fetchIn(ap, `/admin/pdf/${postId}/`)).status === 404);
+  let leaked = false;
+  for (const u of ["/uji-coba-dari-editor-baru/", "/author/qirani/", "/rss.xml", "/sitemap.xml", "/"]) {
+    const r = await ap.request.get(BASE + u);
+    if ((await r.text()).includes("Nama Lengkap Uji") || (await r.text()).includes("SMA Uji Coba")) leaked = true;
+  }
+  check("identitas lengkap tidak tampil di situs", !leaked);
+
   // 11c. Tampilan HP: tidak ada halaman admin yang melebihi lebar layar
   await page.setViewportSize({ width: 375, height: 740 });
   const wide = [];
