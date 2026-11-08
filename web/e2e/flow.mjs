@@ -135,6 +135,18 @@ try {
   await page.fill(".editor-title", "Tulisan untuk minggu depan");
   await page.click(".prose");
   await page.keyboard.type("Isi terjadwal.");
+  // Urungkan: Ctrl+Z saat kursor di luar tulisan, dan tombol ikon di awal toolbar
+  await page.waitForTimeout(700);
+  await page.keyboard.type(" salah ketik");
+  await page.click(".editor-side h3");
+  await page.keyboard.press("Control+z");
+  check("Ctrl+Z mengurungkan walau kursor di luar tulisan", !(await page.textContent(".prose")).includes("salah ketik") && (await page.textContent(".prose")).includes("Isi terjadwal."));
+  await page.click(".prose");
+  await page.keyboard.press("End");
+  await page.waitForTimeout(700);
+  await page.keyboard.type(" kedua");
+  await page.click(".toolbar button[title^='Urungkan']");
+  check("tombol Urungkan di awal toolbar", !(await page.textContent(".prose")).includes("kedua"));
   // Pemilih tanggal qiran: bulan depan, tanggal 15, jam 09.00
   await page.click("#publishAt");
   await page.click(".dtf-panel button[aria-label='Bulan berikutnya']");

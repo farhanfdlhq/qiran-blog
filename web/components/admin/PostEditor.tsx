@@ -77,6 +77,10 @@ function Toolbar({ editor, onLink, onImage }: { editor: Editor; onLink: () => vo
   );
   return (
     <div className="toolbar" role="toolbar" aria-label="Format tulisan">
+      {/* Urungkan dan Ulangi di depan, supaya selalu terlihat (juga di HP yang toolbarnya digeser) */}
+      {btn(<span className="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg><span className="tool-icon-label">Urungkan</span></span>, "Urungkan (Ctrl+Z)", false, () => editor.chain().focus().undo().run(), !s.canUndo)}
+      {btn(<span className="tool-icon"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg><span className="tool-icon-label">Ulangi</span></span>, "Ulangi (Ctrl+Shift+Z atau Ctrl+Y)", false, () => editor.chain().focus().redo().run(), !s.canRedo)}
+      <span className="tool-sep" aria-hidden="true" />
       {btn(<b>B</b>, "Tebal (Ctrl+B)", s.bold, () => editor.chain().focus().toggleBold().run())}
       {btn(<i>I</i>, "Miring (Ctrl+I)", s.italic, () => editor.chain().focus().toggleItalic().run())}
       {btn("Stabilo", "Tandai dengan stabilo", s.mark, () => editor.chain().focus().toggleHighlight().run())}
@@ -90,9 +94,6 @@ function Toolbar({ editor, onLink, onImage }: { editor: Editor; onLink: () => vo
       {btn("Tautan", "Tambah atau ubah tautan", s.link, onLink)}
       {btn("Gambar", "Sisipkan gambar", false, onImage)}
       {btn("* * *", "Garis pemisah", false, () => editor.chain().focus().setHorizontalRule().run())}
-      <span className="tool-sep" aria-hidden="true" />
-      {btn("Urungkan", "Urungkan (Ctrl+Z)", false, () => editor.chain().focus().undo().run(), !s.canUndo)}
-      {btn("Ulangi", "Ulangi (Ctrl+Shift+Z)", false, () => editor.chain().focus().redo().run(), !s.canRedo)}
     </div>
   );
 }
@@ -229,10 +230,21 @@ export function PostEditor({ initial }: { initial: Initial }) {
   // Ctrl/Cmd+S untuk menyimpan, dan peringatan kalau keluar sebelum tersimpan
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+      const mod = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+      if (mod && key === "s") {
         e.preventDefault();
         save("save").then((ok) => ok && toast(status === "draft" ? "Draf tersimpan." : "Perubahan disimpan dan sudah tampil di situs."));
+        return;
       }
+      // Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y untuk isi tulisan, juga saat kursor tidak di dalam tulisan.
+      // Di kolom lain (judul, ringkasan, dan sebagainya) biarkan browser mengurungkan isi kolom itu.
+      if (!mod || !editor || (key !== "z" && key !== "y")) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest(".ProseMirror") || t.closest("input, textarea, select, [contenteditable='true'], dialog"))) return;
+      e.preventDefault();
+      if (key === "y" || e.shiftKey) editor.chain().focus().redo().run();
+      else editor.chain().focus().undo().run();
     };
     const onLeave = (e: BeforeUnloadEvent) => {
       if (dirty) e.preventDefault();
@@ -243,7 +255,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("beforeunload", onLeave);
     };
-  }, [dirty, save, toast, status]);
+  }, [dirty, save, toast, status, editor]);
 
   // Pindah halaman di dalam panel saat belum tersimpan: tanya dulu lewat dialog qiran.
   // (Menutup tab atau refresh tetap memakai peringatan bawaan browser, yang tidak bisa diganti situs mana pun.)

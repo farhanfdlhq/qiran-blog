@@ -30,7 +30,7 @@ Tulisan baru selalu dimulai sebagai **draf**. Draf tersimpan otomatis beberapa d
 | Tautan | Pilih kata dulu, klik Tautan, lalu tempel alamatnya di kotak yang muncul |
 | Gambar | Sisipkan gambar di posisi kursor |
 | * * * | Garis pemisah |
-| Urungkan / Ulangi | Membatalkan atau mengulang perubahan |
+| ↶ Urungkan / ↷ Ulangi | Paling depan di toolbar. Membatalkan atau mengulang perubahan. Bisa juga Ctrl+Z dan Ctrl+Y (Ctrl+Shift+Z), walau kursor sedang tidak di dalam tulisan |
 
 ### Gambar
 
