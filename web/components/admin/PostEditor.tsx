@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEditor, useEditorState, EditorContent, type Editor } from "@tiptap/react";
+import { TextSelection } from "@tiptap/pm/state";
 import Placeholder from "@tiptap/extension-placeholder";
 import { editorExtensions } from "@/lib/editor-schema";
 import { slugify } from "@/lib/text";
@@ -28,7 +29,12 @@ type Initial = {
   status: "draft" | "published";
   scheduled: boolean;
   authorName: string;
+  pdfLabel: string;
+  pdfSubtitle: string;
+  referencesText: string;
 };
+
+type ImageDialog = { kind: "image"; url: string; alt: string; caption: string; source: string; pos?: number };
 
 async function uploadImage(file: File): Promise<string> {
   const body = new FormData();
@@ -106,7 +112,11 @@ export function PostEditor({ initial }: { initial: Initial }) {
   const [saveFailed, setSaveFailed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [words, setWords] = useState(0);
-  const [dialog, setDialog] = useState<null | { kind: "link"; href: string } | { kind: "image"; url: string }>(null);
+  const [pdfLabel, setPdfLabel] = useState(initial.pdfLabel);
+  const [pdfSubtitle, setPdfSubtitle] = useState(initial.pdfSubtitle);
+  const [referencesText, setReferencesText] = useState(initial.referencesText);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [dialog, setDialog] = useState<null | { kind: "link"; href: string } | ImageDialog>(null);
   const { toast, confirm } = useFeedback();
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const imageInput = useRef<HTMLInputElement>(null);
@@ -116,7 +126,16 @@ export function PostEditor({ initial }: { initial: Initial }) {
     extensions: [...editorExtensions(), Placeholder.configure({ placeholder: isPage ? "Ceritakan tentang blog ini…" : "Mulai menulis di sini…" })],
     content: initial.html || "",
     immediatelyRender: false,
-    editorProps: { attributes: { class: "prose", "aria-label": "Isi tulisan", "aria-multiline": "true", role: "textbox" } },
+    editorProps: {
+      attributes: { class: "prose", "aria-label": "Isi tulisan", "aria-multiline": "true", role: "textbox" },
+      // Klik dua kali pada gambar untuk mengubah keterangan, sumber, dan teks alternatifnya
+      handleDoubleClickOn: (_view, _pos, node, nodePos) => {
+        if (node.type.name !== "image" && node.type.name !== "qiranFigure") return false;
+        const a = node.attrs as { src: string; alt?: string; caption?: string; source?: string };
+        setDialog({ kind: "image", url: a.src, alt: a.alt ?? "", caption: a.caption ?? "", source: a.source ?? "", pos: nodePos });
+        return true;
+      },
+    },
     onCreate: ({ editor: e }) => setWords(e.getText().split(/\s+/).filter(Boolean).length),
     onUpdate: ({ editor: e }) => {
       setDirty(true);
@@ -159,6 +178,9 @@ export function PostEditor({ initial }: { initial: Initial }) {
         featureImageCaption: coverCaption,
         allowComments,
         publishAt,
+        pdfLabel,
+        pdfSubtitle,
+        referencesText,
         intent,
       };
       try {
@@ -186,7 +208,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
       }
       return true;
     },
-    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, isPage, toast],
+    [editor, initial.id, title, slug, slugTouched, excerpt, tags, cover, coverAlt, coverCaption, allowComments, publishAt, pdfLabel, pdfSubtitle, referencesText, isPage, toast],
   );
 
   // Simpan otomatis untuk draf, 4 detik setelah berhenti mengetik
@@ -194,7 +216,7 @@ export function PostEditor({ initial }: { initial: Initial }) {
     if (!dirty || status !== "draft" || saving || saveFailed) return;
     const t = setTimeout(() => save("save"), 4000);
     return () => clearTimeout(t);
-  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags]);
+  }, [dirty, status, saving, saveFailed, save, title, excerpt, tags, pdfLabel, pdfSubtitle, referencesText]);
 
   // Ctrl/Cmd+S untuk menyimpan, dan peringatan kalau keluar sebelum tersimpan
   useEffect(() => {
@@ -262,12 +284,44 @@ export function PostEditor({ initial }: { initial: Initial }) {
         setCover(url);
         setDirty(true);
       } else {
-        setDialog({ kind: "image", url });
+        setDialog({ kind: "image", url, alt: "", caption: "", source: "" });
       }
     } catch (e) {
       toast(e instanceof Error ? e.message : "Gagal mengunggah gambar.", "err");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const downloadPdf = async () => {
+    if (pdfBusy) return;
+    if (!title.trim() || !editor || editor.isEmpty) {
+      toast("Isi judul dan tulisan dulu sebelum membuat PDF.", "err");
+      return;
+    }
+    setPdfBusy(true);
+    try {
+      if (dirty && !(await save("save"))) return;
+      const res = await fetch(`/admin/pdf/${initial.id}/`, { cache: "no-store" });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        toast(data.error || "PDF gagal dibuat. Coba lagi sebentar lagi.", "err");
+        return;
+      }
+      const blob = await res.blob();
+      const name = /filename\*=UTF-8''([^;]+)/.exec(res.headers.get("content-disposition") ?? "")?.[1];
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name ? decodeURIComponent(name) : "tulisan.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+      toast("PDF siap. Cek folder unduhan.");
+    } catch {
+      toast("PDF gagal dibuat. Periksa koneksi internet lalu coba lagi.", "err");
+    } finally {
+      setPdfBusy(false);
     }
   };
 
@@ -371,11 +425,37 @@ export function PostEditor({ initial }: { initial: Initial }) {
                 <p className="hint" id="alt-hint">Gambaran singkat isi foto, untuk pembaca yang memakai pembaca layar.</p>
               </div>
               <div className="field">
-                <label htmlFor="caption">Keterangan foto</label>
+                <label htmlFor="caption">Sumber foto</label>
                 <input id="caption" value={coverCaption} maxLength={300} onChange={(e) => touch(setCoverCaption)(e.target.value)} placeholder="Foto: nama fotografer / Unsplash" aria-describedby="caption-hint" />
-                <p className="hint" id="caption-hint">Tampil kecil di bawah gambar. Boleh dikosongkan.</p>
+                <p className="hint" id="caption-hint">Tampil kecil di bawah gambar. Wajib diisi kalau tulisan untuk lomba.</p>
               </div>
             </>
+          ) : null}
+          {!isPage ? (
+            <div className="field">
+              <label htmlFor="refs">Daftar Pustaka</label>
+              <textarea id="refs" value={referencesText} maxLength={20000} onChange={(e) => touch(setReferencesText)(e.target.value)}
+                aria-describedby="refs-hint" style={{ minHeight: 140 }} placeholder={"Nugroho, A. (2026, 23 Januari). *Ratusan sopir angkot geruduk Balai Kota Bogor*. RMOL. https://rmol.id/…"} />
+              <p className="hint" id="refs-hint">Satu sumber per baris. Apit judul dengan *bintang* supaya miring. Tampil di akhir tulisan dan di PDF.</p>
+            </div>
+          ) : null}
+          {!isPage ? (
+            <section className="pdf-box" aria-labelledby="pdf-title">
+              <h3 id="pdf-title">PDF untuk tugas dan lomba</h3>
+              <p className="hint">A4, Times New Roman, spasi 1,5, dua kolom. Nama lengkap dan sekolah diambil dari <a className="textlink" href="/admin/akun/">Akun saya</a>.</p>
+              <div className="field">
+                <label htmlFor="pdfLabel">Label jenis tulisan</label>
+                <input id="pdfLabel" value={pdfLabel} maxLength={40} onChange={(e) => touch(setPdfLabel)(e.target.value)} placeholder={tags[0] ? `Kosong = ${tags[0]}` : "Misalnya: Artikel Opini"} />
+              </div>
+              <div className="field">
+                <label htmlFor="pdfSubtitle">Subjudul</label>
+                <input id="pdfSubtitle" value={pdfSubtitle} maxLength={160} onChange={(e) => touch(setPdfSubtitle)(e.target.value)} aria-describedby="pdfsub-hint" />
+                <p className="hint" id="pdfsub-hint">Dicetak setelah judul: &ldquo;Judul: Subjudul&rdquo;. Boleh dikosongkan.</p>
+              </div>
+              <button className="btn btn-small" type="button" onClick={downloadPdf} disabled={pdfBusy || saving} aria-busy={pdfBusy}>
+                {pdfBusy ? "Membuat PDF…" : "Unduh PDF"}
+              </button>
+            </section>
           ) : null}
           {!isPage ? (
             <label className="check">
@@ -410,11 +490,34 @@ export function PostEditor({ initial }: { initial: Initial }) {
       />
       <FormDialog
         open={dialog?.kind === "image"}
-        title="Gambar"
-        submitLabel="Sisipkan"
-        fields={[{ name: "alt", label: "Teks alternatif", placeholder: "Gambaran singkat isi gambar", hint: "Untuk pembaca yang tidak bisa melihat gambar. Boleh dikosongkan kalau gambar hanya hiasan." }]}
-        onSubmit={({ alt }) => {
-          if (dialog?.kind === "image") editor?.chain().focus().setImage({ src: dialog.url, alt }).run();
+        title={dialog?.kind === "image" && dialog.pos != null ? "Ubah gambar" : "Gambar"}
+        submitLabel={dialog?.kind === "image" && dialog.pos != null ? "Simpan" : "Sisipkan"}
+        fields={[
+          { name: "caption", label: "Keterangan", value: dialog?.kind === "image" ? dialog.caption : "", placeholder: "Misalnya: Balai Kota Bogor dipadati sopir angkot", hint: "Diberi nomor otomatis: Gambar 1, Gambar 2, dan seterusnya. Boleh dikosongkan." },
+          { name: "source", label: "Sumber", value: dialog?.kind === "image" ? dialog.source : "", placeholder: "Misalnya: RMOL, 23 Januari 2026", hint: "Ditulis sebagai (Sumber: …). Wajib kalau gambar bukan milikmu." },
+          { name: "alt", label: "Teks alternatif", value: dialog?.kind === "image" ? dialog.alt : "", placeholder: "Gambaran singkat isi gambar", hint: "Untuk pembaca yang tidak bisa melihat gambar." },
+        ]}
+        onSubmit={({ alt, caption, source }) => {
+          if (dialog?.kind !== "image" || !editor) return;
+          const node = caption || source
+            ? editor.schema.nodes.qiranFigure.create({ src: dialog.url, alt, caption, source })
+            : editor.schema.nodes.image.create({ src: dialog.url, alt });
+          const pos = dialog.pos;
+          if (pos != null) {
+            editor.chain().focus().command(({ tr }) => {
+              tr.replaceWith(pos, pos + (tr.doc.nodeAt(pos)?.nodeSize ?? 1), node);
+              return true;
+            }).run();
+          } else {
+            editor.chain().focus().insertContent(node.toJSON()).command(({ tr, state, dispatch }) => {
+              // Kursor pindah ke baris setelah gambar, supaya ketikan berikutnya tidak menimpa gambar
+              const after = tr.selection.to;
+              const next = tr.doc.nodeAt(after);
+              if (!next || next.type.name !== "paragraph" || next.content.size) tr.insert(after, state.schema.nodes.paragraph.create());
+              if (dispatch) tr.setSelection(TextSelection.create(tr.doc, after + 1));
+              return true;
+            }).run();
+          }
           setDialog(null);
         }}
         onClose={() => setDialog(null)}

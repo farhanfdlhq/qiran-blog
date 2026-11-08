@@ -57,6 +57,9 @@ export type EditorPayload = {
   featureImageCaption: string;
   allowComments: boolean;
   publishAt: string; // datetime-local dalam WIB, boleh kosong
+  pdfLabel?: string;
+  pdfSubtitle?: string;
+  referencesText?: string;
   intent: "save" | "publish" | "unpublish";
 };
 
@@ -101,6 +104,9 @@ export async function saveFromEditor(payload: EditorPayload): Promise<SaveResult
       allowComments: payload.allowComments !== false,
       authorId: user.id,
       tags: payload.tags.map(String),
+      pdfLabel: payload.pdfLabel == null ? undefined : String(payload.pdfLabel),
+      pdfSubtitle: payload.pdfSubtitle == null ? undefined : String(payload.pdfSubtitle),
+      referencesText: payload.referencesText == null ? undefined : String(payload.referencesText),
     });
     revalidatePath("/", "layout");
     const scheduled = saved.status === "published" && saved.published_at && saved.published_at > new Date().toISOString();

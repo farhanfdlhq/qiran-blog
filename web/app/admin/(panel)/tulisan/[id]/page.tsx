@@ -29,6 +29,9 @@ export default async function EditPost({ params }: { params: Promise<{ id: strin
         status: post.status,
         scheduled: isScheduled(post),
         authorName: post.author?.name ?? "",
+        pdfLabel: post.pdf_label,
+        pdfSubtitle: post.pdf_subtitle,
+        referencesText: post.references_text,
       }}
     />
   );

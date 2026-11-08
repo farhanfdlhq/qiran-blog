@@ -250,3 +250,15 @@
     .admin-head .btn { min-height: 44px; }
 }
 .list-title, .comment-body, .list-meta { overflow-wrap: anywhere; }
+
+/* ---------- Gambar berketerangan dan kotak PDF ---------- */
+.prose figure.qiran-fig { margin: 1.4em 0; }
+.prose figure.qiran-fig img { display: block; max-width: 100%; height: auto; border-radius: 6px; }
+.prose figure.qiran-fig figcaption { margin-top: 8px; color: var(--muted); font-size: var(--step-small); line-height: 1.5; }
+.prose figure.qiran-fig figcaption:empty::before { content: "Klik dua kali untuk menambah keterangan"; font-style: italic; }
+.prose figure.qiran-fig.ProseMirror-selectednode img { outline: 3px solid var(--accent); }
+.prose img { cursor: zoom-in; }
+.pdf-box { display: grid; gap: 14px; padding: 18px; border-radius: 10px; background: var(--bg); }
+.pdf-box h3 { margin: 0; }
+.pdf-box .field input { background: var(--surface); }
+.pdf-box .btn { justify-self: start; }

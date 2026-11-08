@@ -47,7 +47,17 @@ try {
   await page.waitForURL(/\/admin\/tulisan\/\d+\/$/);
   const editUrl = page.url();
   await page.fill(".editor-title", "Uji coba dari editor baru");
+  const imgPath = path.join(os.tmpdir(), "qiran-e2e.png");
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+  fs.writeFileSync(imgPath, png);
   await page.click(".prose");
+  // gambar di dalam tulisan dengan keterangan dan sumber
+  await page.setInputFiles('input[type=file]:not(.cover input)', imgPath);
+  await page.waitForSelector(".dialog[open] #dlg-caption", { timeout: 15000 });
+  await page.fill("#dlg-caption", "Halte depan sekolah saat hujan");
+  await page.fill("#dlg-source", "Dokumentasi pribadi, 2026");
+  await page.click(".dialog[open] button[type=submit]");
+  check("gambar berketerangan masuk ke editor", await page.locator(".prose figure.qiran-fig figcaption:has-text('Sumber: Dokumentasi pribadi')").isVisible({ timeout: 5000 }).catch(() => false));
   await page.keyboard.type("Paragraf pertama yang ditulis lewat editor visual. ");
   await page.keyboard.press("Control+B");
   await page.keyboard.type("tebal");
@@ -65,12 +75,11 @@ try {
   await page.keyboard.press("Enter");
   check("tag jadi chip, ejaan mengikuti tag yang ada", (await page.locator(".tag-chip").allTextContents()).join("|") === "Uji|Opini");
   // unggah gambar sampul
-  const imgPath = path.join(os.tmpdir(), "qiran-e2e.png");
-  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
-  fs.writeFileSync(imgPath, png);
   await page.setInputFiles('.cover input[type=file]', imgPath);
   await page.waitForSelector(".cover img", { timeout: 15000 });
   check("unggah gambar sampul", (await page.getAttribute(".cover img", "src")).startsWith("/uploads/"));
+  await page.fill("#refs", "Nugroho, A. (2026). *Judul berita*. RMOL. https://rmol.id/contoh");
+  await page.fill("#pdfLabel", "Artikel Opini");
   await page.click("text=Terbitkan");
   await page.waitForSelector(".toast-ok:has-text('Tulisan diterbitkan!')", { timeout: 10000 });
   check("terbitkan tulisan (notifikasi qiran)", true);
@@ -98,9 +107,10 @@ try {
   // 3. Tampil di situs publik dengan stabilo dan tebal
   const pub = await ctx.newPage();
   await pub.goto(BASE + "/uji-coba-dari-editor-baru/");
+  check("nomor gambar dan Daftar Pustaka tampil di situs", (await pub.textContent(".gh-content")).includes("Gambar 1. Halte depan sekolah saat hujan (Sumber: Dokumentasi pribadi, 2026)") && (await pub.locator(".references em:has-text('Judul berita')").count()) === 1);
   const body = await pub.innerHTML(".article-body");
   check("tulisan tampil di situs", (await pub.textContent("h1")).includes("Uji coba dari editor baru"));
-  check("format tebal dan stabilo tersimpan", body.includes("<strong>tebal</strong>") && body.includes("<mark>"));
+  check("format tebal dan stabilo tersimpan", body.includes("<strong>tebal</strong>") && body.includes("<mark>"), body.slice(0, 500));
   await pub.goto(BASE + "/");
   check("muncul di beranda sebagai tulisan terbaru", (await pub.textContent("#latest-title")).includes("Uji coba dari editor baru"));
   await pub.goto(BASE + "/tag/uji/");
