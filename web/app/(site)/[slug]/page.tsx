@@ -10,6 +10,8 @@ import { imgSrcSet, postPath, siteUrl } from "@/lib/site";
 import { Row } from "@/components/PostList";
 import { CommentForm } from "@/components/CommentForm";
 import { ShareButtons } from "@/components/ShareButtons";
+import { numberFigures } from "@/lib/figures";
+import { referencesHtml } from "@/lib/references";
 import { shareMeta } from "@/lib/meta";
 import { ogImagePath } from "@/lib/og";
 
@@ -64,6 +66,7 @@ export default async function PostPage({ params }: Props) {
   const isPost = post.type === "post";
   const comments = isPost ? listApproved(post.id) : [];
   const commentsOpen = isPost && !preview && post.allow_comments === 1 && s.comments_enabled === "1";
+  const refs = isPost ? referencesHtml(post.references_text) : "";
   const more = isPost ? listPublished({ page: 1, perPage: 5, excludeId: post.id }).items : [];
 
   const jsonLd = isPost
@@ -109,11 +112,18 @@ export default async function PostPage({ params }: Props) {
           <figure className="article-figure">
             <img src={post.feature_image} srcSet={imgSrcSet(post.feature_image)} sizes="(min-width: 1100px) 1100px, 100vw"
               alt={post.feature_image_alt || post.title} width={2000} height={1250} fetchPriority="high" />
-            {post.feature_image_caption ? <figcaption dangerouslySetInnerHTML={{ __html: post.feature_image_caption }} /> : null}
+            {post.feature_image_caption ? <figcaption>{post.feature_image_caption}</figcaption> : null}
           </figure>
         ) : null}
 
-        <div className="gh-content article-body" dangerouslySetInnerHTML={{ __html: post.content_html }} />
+        <div className="gh-content article-body" dangerouslySetInnerHTML={{ __html: numberFigures(post.content_html) }} />
+
+        {refs ? (
+          <section className="references" aria-labelledby="ref-title">
+            <h2 className="references-title" id="ref-title">Daftar Pustaka</h2>
+            <ol className="ref-list" dangerouslySetInnerHTML={{ __html: refs }} />
+          </section>
+        ) : null}
 
         {isPost && post.tags.length ? (
           <footer className="article-end reveal">

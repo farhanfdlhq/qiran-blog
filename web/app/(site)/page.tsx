@@ -46,7 +46,7 @@ export default function Home() {
             <figure className="relief">
               <img className="relief-img" src={latest.feature_image} srcSet={imgSrcSet(latest.feature_image)} sizes="100vw"
                 alt={latest.feature_image_alt || latest.title} width={2000} height={1125} loading="lazy" />
-              {latest.feature_image_caption ? <figcaption dangerouslySetInnerHTML={{ __html: latest.feature_image_caption }} /> : null}
+              {latest.feature_image_caption ? <figcaption>{latest.feature_image_caption}</figcaption> : null}
             </figure>
           ) : null}
         </>

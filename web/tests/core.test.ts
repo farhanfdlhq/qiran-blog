@@ -407,3 +407,37 @@ describe("PDF: identitas dan kolom tulisan", () => {
     expect(again.references_text).toBe("Satu. https://a.id\nDua.");
   });
 });
+
+describe("PDF: Daftar Pustaka dan nomor gambar", async () => {
+  const { referencesHtml } = await import("@/lib/references");
+  const { numberFigures } = await import("@/lib/figures");
+  const { sanitize } = await import("@/lib/render");
+
+  it("mengubah daftar pustaka jadi daftar aman dengan tautan dan huruf miring", () => {
+    const html = referencesHtml("A. (2026). *Judul buku*. https://x.id/a?b=1&c=2.\n\n  \n<b>B</b> & C");
+    expect(html.match(/<li>/g)?.length).toBe(2);
+    expect(html).toContain("<em>Judul buku</em>");
+    expect(html).toContain('href="https://x.id/a?b=1&amp;c=2"');
+    expect(html).toContain("</a>.");
+    expect(html).toContain("&lt;b&gt;B&lt;/b&gt; &amp; C");
+    expect(referencesHtml("  \n\n")).toBe("");
+    expect(referencesHtml('javascript:alert(1) "x"')).not.toContain("<a");
+  });
+
+  it("memberi nomor hanya pada gambar qiran berketerangan", () => {
+    const fig = (c: string) => `<figure class="qiran-fig"><img src="/uploads/${c}.jpg" alt="" /><figcaption><span class="fig-caption">${c}</span></figcaption></figure>`;
+    const ghost = '<figure class="kg-image-card"><img src="/uploads/g.jpg" /><figcaption>Foto Ghost</figcaption></figure>';
+    const out = numberFigures(fig("satu") + ghost + fig("dua"));
+    expect(out).toContain('<figcaption><span class="fig-num">Gambar 1.</span> <span class="fig-caption">satu');
+    expect(out).toContain('<figcaption><span class="fig-num">Gambar 2.</span> <span class="fig-caption">dua');
+    expect(out).toContain("<figcaption>Foto Ghost</figcaption>");
+  });
+
+  it("sanitize mempertahankan struktur gambar berketerangan tapi membuang nomor buatan", () => {
+    const html = '<figure class="qiran-fig"><img src="/uploads/a.jpg" alt="x"><figcaption><span class="fig-num">Gambar 9.</span><span class="fig-caption">K</span> <span class="fig-source">S</span></figcaption></figure>';
+    const out = sanitize(html);
+    expect(out).toContain('<figure class="qiran-fig">');
+    expect(out).toContain('<span class="fig-caption">K</span> <span class="fig-source">S</span>');
+    expect(out).not.toContain("fig-num");
+  });
+});
